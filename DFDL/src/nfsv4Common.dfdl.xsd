@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+RFC7530 - NFSv4 Common Structures
+
+Author: J Peter Brady
+
+DFDL implementation of NFSv4 based on RFC 7530. Element names have been
+used that mimic the ones used in the specification.
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:nfsv4Common"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:net="urn:network/format"
+  xmlns:v4c="urn:nfsv4Common"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- XDR: External Data Representation -->
+
+  <xs:import namespace="urn:xdr" schemaLocation="xdr.dfdl.xsd"/>
+
+  <!-- NFSv4 Type Definitions -->
+  <xs:simpleType name="seqid4">
+    <xs:restriction base="xdr:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="sequenceid4">
+    <xs:restriction base="xdr:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="count4">
+    <xs:restriction base="xdr:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="layouttype4">
+    <xs:restriction base="xdr:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="clientid4">
+    <xs:restriction base="xdr:unsignedHyper"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="length4">
+    <xs:restriction base="xdr:unsignedHyper"/>
+  </xs:simpleType>
+
+    <xs:simpleType name="offset4">
+      <xs:restriction base="xdr:unsignedHyper"/>
+    </xs:simpleType>
+
+  <xs:simpleType name="nfs_cookie4">
+    <xs:restriction base="xdr:unsignedHyper"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="verifier4" dfdl:length="8"> <!-- from RFC 7863 -->
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="stateOther" dfdl:length="12"> <!-- from RFC 7863 -->
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="sessionid4" dfdl:length="16">
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="deviceid4" dfdl:length="16">
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="opaqueLimit" dfdl:length="1024"> <!-- from RFC 7863 -->
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="changeid4">
+    <xs:restriction base="xdr:unsignedHyper"/>
+  </xs:simpleType>
+
+  <xs:complexType name="stateid4">
+    <xs:sequence>
+      <xs:element name="seqid" type="xdr:unsignedInt" />
+      <xs:element name="other" type="v4c:stateOther" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="open_owner4">
+    <xs:sequence>
+      <xs:element name="clientid" type="v4c:clientid4" />
+      <xs:element name="owner" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+<xs:complexType name="nfstime4">
+  <xs:sequence>
+    <xs:element name="seconds" type="xdr:hyper" />
+    <xs:element name="nseconds" type="xdr:unsignedInt" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="component4">
+  <xs:sequence>
+    <xs:element name="component" type="xdr:opaque" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="server_owner4">
+  <xs:sequence>
+    <xs:element name="so_minor_id" type="xdr:unsignedHyper" />
+    <xs:element name="so_major_id" type="v4c:opaqueLimit" />
+  </xs:sequence>
+</xs:complexType>
+
+<!-- typedef utf8str_cs component4; but for now we'll make it an opaque value -->
+
+<xs:complexType name="nfs_impl_id4">
+  <xs:sequence>
+    <xs:element name="nii_domain" type="xdr:opaque" />
+    <xs:element name="nii_name" type="xdr:opaque" />
+    <xs:element name="nii_date" type="v4c:nfstime4" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="stable_how4">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="0" />
+    <xs:maxInclusive value="2" />
+  </xs:restriction>
+</xs:simpleType>
+
+  <xs:complexType name="open4_nocreate">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="openflag4">
+    <xs:sequence>
+      <xs:element name="mode" type="xdr:unsignedInt" />
+      <xs:element name="open_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+            <xs:element name="nocreate" type="v4c:open4_nocreate" dfdl:choiceBranchKey="0" />
+            <xs:element name="how" type="v4c:createhow4" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="bitmap4">
+    <xs:sequence>
+      <xs:element name="numargs" type="xdr:unsignedInt" />
+      <xs:element name="bitmap" type="xdr:unsignedInt" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{ ../numargs }" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="fattr4">
+    <xs:sequence>
+      <xs:element name="numargs" type="xdr:unsignedInt" />
+      <xs:element name="attrmask" type="xdr:unsignedInt" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{ ../numargs }" />
+      <xs:element name="attr_vals" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="client_owner4">
+    <xs:sequence>
+      <xs:element name="co_verifier" type="v4c:verifier4" />
+      <xs:element name="co_ownerid" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NB: EXCLUSIVE4_1 mode not in choices yet. -->
+  <xs:complexType name="createhow4">
+    <xs:sequence>
+      <xs:element name="mode" type="xdr:unsignedInt" />
+      <xs:element name="create_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+            <xs:element name="createattrs0" type="v4c:fattr4" dfdl:choiceBranchKey="0" />
+            <xs:element name="createattrs1" type="v4c:fattr4" dfdl:choiceBranchKey="1" />
+            <xs:element name="createverf" type="v4c:verifier4" dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+<xs:simpleType name="open_delegation_type4">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="0" />
+    <xs:maxInclusive value="2" />
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="open_claim_delegate_cur4">
+  <xs:sequence>
+    <xs:element name="delegate_stateid" type="v4c:stateid4" />
+    <xs:element name="file" type="xdr:opaque" />
+  </xs:sequence>
+</xs:complexType>
+
+<!-- component4 replaced by xdr:opaque -->
+<xs:complexType name="open_claim4">
+  <xs:sequence>
+    <xs:element name="mode" type="xdr:unsignedInt" />
+    <!-- Claim types go up to 6 in 4.1. Will update soon. -->
+    <xs:element name="claim_dispatch">
+      <xs:complexType>
+        <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+          <xs:element name="file0" type="xdr:string" dfdl:choiceBranchKey="0" />
+          <xs:element name="delegate_type" type="v4c:open_delegation_type4" dfdl:choiceBranchKey="1" />
+          <xs:element name="delegate_cur_info" type="v4c:open_claim_delegate_cur4" dfdl:choiceBranchKey="2" />
+          <xs:element name="file3" type="xdr:string" dfdl:choiceBranchKey="3" />
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="state_protect4_a">
+  <xs:sequence>
+    <xs:element name="mode" type="xdr:unsignedInt" />
+    <xs:element name="protect_dispatch">
+      <xs:complexType>
+        <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+          <xs:element name="spa_void" type="xdr:void" dfdl:choiceBranchKey="0" />
+          <xs:element name="spa_mach_ops" type="xdr:opaque" dfdl:choiceBranchKey="1" />
+          <xs:element name="spa_ssv_params" type="xdr:opaque" dfdl:choiceBranchKey="2" />
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<!-- count4 are unsignedInt -->
+<xs:complexType name="channel_attrs4">
+  <xs:sequence>
+    <xs:element name="ca_headerpadsize" type="xdr:unsignedInt" />
+    <xs:element name="ca_maxrequestsize" type="xdr:unsignedInt" />
+    <xs:element name="ca_maxresponsesize" type="xdr:unsignedInt" />
+    <xs:element name="ca_maxresponsesize_cached" type="xdr:unsignedInt" />
+    <xs:element name="ca_maxoperations" type="xdr:unsignedInt" />
+    <xs:element name="ca_maxrequests" type="xdr:unsignedInt" />
+    <xs:element name="ca_rdma_ird" type="xdr:unsignedInt" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="authsys_parms">
+  <xs:sequence>
+    <xs:element name="authlen" type="xdr:unsignedInt" />
+    <xs:element name="stamp" type="xdr:unsignedInt" />
+    <xs:element name="machinename" type="xdr:opaque" />
+    <xs:element name="uid" type="xdr:unsignedInt" />
+    <xs:element name="gid" type="xdr:unsignedInt" />
+    <xs:element name="gids" type="xdr:opaque" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="rpc_gss_svc_t">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="1" />
+    <xs:maxInclusive value="3" />
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="gss_cb_handles4">
+  <xs:sequence>
+    <xs:element name="gcbp_service" type="v4c:rpc_gss_svc_t" />
+    <xs:element name="gcbp_handle_from_server" type="xdr:opaque" />
+    <xs:element name="gcbp_handle_from_client" type="xdr:opaque" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="callback_sec_parms4">
+  <xs:sequence>
+    <xs:element name="mode" type="xdr:unsignedInt" />
+    <xs:element name="callback_dispatch">
+      <xs:complexType>
+        <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+          <xs:element name="auth_void" type="xdr:void" dfdl:choiceBranchKey="0" />
+          <xs:element name="cbsp_sys_cred" type="v4c:authsys_parms" dfdl:choiceBranchKey="1" />
+          <xs:element name="cbsp_gss_handles" type="v4c:gss_cb_handles4" dfdl:choiceBranchKey="2" />
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="secinfo_style4">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="0" />
+    <xs:maxInclusive value="1" />
+  </xs:restriction>
+</xs:simpleType>
+
+   <xs:complexType name="specdata4">
+     <xs:sequence>
+       <xs:element name="specdata1" type="xdr:unsignedInt" />
+       <xs:element name="specdata2" type="xdr:unsignedInt" />
+     </xs:sequence>
+   </xs:complexType>
+
+   <!-- non values should return NFS4ERR_BADTYPE -->
+   <!-- typedef utf8str_cs linktext4; -->
+   <xs:complexType name="createtype4">
+     <xs:sequence>
+       <xs:element name="mode" type="xdr:unsignedInt" />
+       <xs:element name="create_dispatch">
+         <xs:complexType>
+           <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+             <xs:element name="sockdata" type="xdr:int"      dfdl:choiceBranchKey="2" /><!--NF4SOCK-->
+             <xs:element name="chrdata" type="v4c:specdata4" dfdl:choiceBranchKey="3" /><!--NF4CHR-->
+             <xs:element name="blkdata" type="v4c:specdata4" dfdl:choiceBranchKey="4" /><!--NF4BLK-->
+             <xs:element name="linkdata" type="xdr:string"   dfdl:choiceBranchKey="5" /><!--NF4LNK-->
+             <xs:element name="fifodata" type="xdr:int"      dfdl:choiceBranchKey="6" /><!--NF4FIFO-->
+             <xs:element name="dirdata"  type="xdr:int"      dfdl:choiceBranchKey="7" /><!--NF4DIR-->
+           </xs:choice>
+         </xs:complexType>
+       </xs:element>
+     </xs:sequence>
+   </xs:complexType>
+
+<xs:simpleType name="nfs_lock_type4">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="1" />
+    <xs:maxInclusive value="4" />
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="state_owner4">
+  <xs:sequence>
+    <xs:element name="clientid" type="v4c:clientid4" />
+    <xs:element name="owner" type="v4c:opaqueLimit" />
+  </xs:sequence>
+</xs:complexType>
+
+<!-- state_owner4, lock_owner4, and open_owner4 are identical -->
+<xs:complexType name="open_to_lock_owner4">
+  <xs:sequence>
+    <xs:element name="open_seqid" type="v4c:seqid4" />
+    <xs:element name="open_stateid" type="v4c:stateid4" />
+    <xs:element name="lock_seqid" type="v4c:seqid4" />
+    <xs:element name="lock_owner" type="v4c:state_owner4" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="exist_lock_owner4">
+  <xs:sequence>
+    <xs:element name="lock_stateid" type="v4c:stateid4" />
+    <xs:element name="lock_seqid" type="v4c:seqid4" />
+  </xs:sequence>
+</xs:complexType>
+
+    <xs:complexType name="locker4">
+      <xs:sequence>
+        <xs:element name="new_lock_owner" type="xdr:int" />
+        <xs:element name="lock_dispatch">
+          <xs:complexType>
+            <xs:choice dfdl:choiceDispatchKey="{ xs:string(../new_lock_owner) }">
+              <xs:element name="lock_owner"  type="v4c:exist_lock_owner4"    dfdl:choiceBranchKey="0" />
+              <xs:element name="open_owner"  type="v4c:open_to_lock_owner4"  dfdl:choiceBranchKey="1" />
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+
+  <xs:complexType name="rpcsec_gss_info">
+    <xs:sequence>
+      <xs:element name="oid" type="xdr:opaque" />
+      <xs:element name="qop" type="xdr:unsignedInt" />
+      <xs:element name="service" type="v4c:rpc_gss_svc_t" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="change_info4">
+    <xs:sequence>
+      <xs:element name="atomic"    type="xdr:bool" />
+      <xs:element name="before"    type="v4c:changeid4" />
+      <xs:element name="after"     type="v4c:changeid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfs_modified_limit4">
+    <xs:sequence>
+      <xs:element name="num_blocks"      type="xdr:unsignedInt" />
+      <xs:element name="bytes_per_block" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfs_space_limit4">
+    <xs:sequence>
+      <xs:element name="limitby"      type="xdr:unsignedInt" />
+      <xs:element name="dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../limitby) }">
+            <xs:element name="filesize"   type="xdr:unsignedHyper"        dfdl:choiceBranchKey="1" />
+            <xs:element name="mod_blocks" type="v4c:nfs_modified_limit4"  dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfsace4">
+    <xs:sequence>
+      <xs:element name="type"         type="xdr:unsignedInt" />
+      <xs:element name="flag"         type="xdr:unsignedInt" />
+      <xs:element name="access_mask"  type="xdr:unsignedInt" />
+      <xs:element name="who"          type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="open_read_delegation4">
+    <xs:sequence>
+      <xs:element name="stateid"     type="v4c:stateid4" />
+      <xs:element name="recall"      type="xdr:bool" />
+      <xs:element name="permissions" type="v4c:nfsace4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="open_write_delegation4">
+    <xs:sequence>
+      <xs:element name="stateid"     type="v4c:stateid4" />
+      <xs:element name="recall"      type="xdr:bool" />
+      <xs:element name="space_limit" type="v4c:nfs_space_limit4" />
+      <xs:element name="permissions" type="v4c:nfsace4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="open_none_delegation4">
+    <xs:sequence>
+      <xs:element name="why"      type="xdr:unsignedInt" />
+      <xs:element name="dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../why) }">
+            <xs:element name="server_push"   type="xdr:bool"  dfdl:choiceBranchKey="1" />
+            <xs:element name="server_signal" type="xdr:bool"  dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name="open_delegation4">
+    <xs:sequence>
+      <xs:element name="delegation_type" type="xdr:unsignedInt" />
+      <xs:element name="dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../delegation_type) }">
+            <xs:sequence                                               dfdl:choiceBranchKey="0" />
+            <xs:element name="read"  type="v4c:open_read_delegation4"  dfdl:choiceBranchKey="1" />
+            <xs:element name="write" type="v4c:open_write_delegation4" dfdl:choiceBranchKey="2" />
+            <xs:element name="ext"   type="v4c:open_none_delegation4"  dfdl:choiceBranchKey="3" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="open4resok">
+    <xs:sequence>
+      <xs:element name="stateid"    type="v4c:stateid4" />
+      <xs:element name="cinfo"      type="v4c:change_info4" />
+      <xs:element name="rflags"     type="xdr:unsignedInt" />
+      <xs:element name="attrset"    type="v4c:bitmap4" />
+      <xs:element name="delegation" type="v4c:open_delegation4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="layoutreturn_file4">
+    <xs:sequence>
+      <xs:element name="offset"    type="v4c:offset4" />
+      <xs:element name="length"    type="v4c:length4" />
+      <xs:element name="stateid"    type="v4c:stateid4" />
+      <xs:element name="body"    type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="layoutreturn4sw">
+    <xs:sequence>
+      <xs:element name="return_type" type="xdr:unsignedInt" />
+      <xs:element name="dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../return_type) }">
+            <xs:element name="filelayout" type="v4c:layoutreturn_file4" dfdl:choiceBranchKey="1" />
+            <xs:element name="br2"        type="xdr:void"               dfdl:choiceBranchKey="2" />
+            <xs:element name="br3"        type="xdr:void"               dfdl:choiceBranchKey="3" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfs_client_id4">
+    <xs:sequence>
+      <xs:element name="verifier" type="v4c:verifier4" />
+      <xs:element name="return_type" type="xdr:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="clientaddr4">
+    <xs:sequence>
+      <xs:element name="r_netid" type="xdr:string" />
+      <xs:element name="r_addr" type="xdr:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="cb_client4">
+    <xs:sequence>
+      <xs:element name="cb_program" type="xdr:unsignedInt" />
+      <xs:element name="cb_location" type="v4c:clientaddr4" />
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

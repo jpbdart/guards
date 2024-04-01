@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+NFSv3 DFDL implementation
+Contains code for mountd.
+
+Author: J Peter Brady
+
+DFDL implementation of NFS based on RFC 1813. Element names have been
+used that mimic the ones used in the specification.
+
+07-Dec-22  jpb  Changed name from rfc1813 to nfsv3 to better show that this code
+                will be updated to the latest RFCs for NFSv3.
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:nfsv3"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:net="urn:network/format"
+  xmlns:nfsv3="urn:nfsv3"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- XDR: External Data Representation -->
+
+  <xs:import namespace="urn:xdr" schemaLocation="xdr.dfdl.xsd"/>
+
+  <!-- Basic data types: definitions that are used in structures below -->
+
+  <xs:simpleType name="uint64">
+    <xs:restriction base="xdr:unsignedHyper"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="int64">
+    <xs:restriction base="xdr:hyper"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="uint32">
+    <xs:restriction base="xdr:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="int32">
+    <xs:restriction base="xdr:int"/>
+  </xs:simpleType>
+
+  <xs:complexType name="filename3">
+    <xs:group ref="xdr:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="nfspath3">
+    <xs:group ref="xdr:string"/>
+  </xs:complexType>
+
+  <xs:simpleType name="fileid3">
+    <xs:restriction base="nfsv3:uint64"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="cookie3">
+    <xs:restriction base="nfsv3:uint64"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="cookieverf3" dfdl:length="8">
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="createverf3" dfdl:length="8">
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="writeverf3" dfdl:length="8">
+    <xs:restriction base="xdr:opaqueN"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="uid3">
+    <xs:restriction base="nfsv3:uint32"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="gid3">
+    <xs:restriction base="nfsv3:uint32"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="size3">
+    <xs:restriction base="nfsv3:uint64"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="offset3">
+    <xs:restriction base="nfsv3:uint64"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="mode3">
+    <xs:restriction base="nfsv3:uint32"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="count3">
+    <xs:restriction base="nfsv3:uint32"/>
+  </xs:simpleType>
+
+  <!-- Call entry/dispatch table from rfc1831. The key was parsed as part of the initial ONC RPC -->
+
+  <xs:complexType name="nfsv3">
+    <xs:choice dfdl:choiceDispatchKey="{ xs:string(../../../proc) }">
+      <xs:element name="null"         type="nfsv3:null"         dfdl:choiceBranchKey="0" />
+      <xs:element name="getattr"      type="nfsv3:getattr"      dfdl:choiceBranchKey="1" />
+      <xs:element name="setattr"      type="nfsv3:setattr"      dfdl:choiceBranchKey="2" />
+      <xs:element name="lookup"       type="nfsv3:lookup"       dfdl:choiceBranchKey="3" />
+      <xs:element name="access"       type="nfsv3:access"       dfdl:choiceBranchKey="4" />
+      <xs:element name="readlink"     type="nfsv3:readlink"     dfdl:choiceBranchKey="5" />
+      <xs:element name="read"         type="nfsv3:read"         dfdl:choiceBranchKey="6" />
+      <xs:element name="write"        type="nfsv3:write"        dfdl:choiceBranchKey="7" />
+      <xs:element name="create"       type="nfsv3:create"       dfdl:choiceBranchKey="8" />
+      <xs:element name="mkdir"        type="nfsv3:mkdir"        dfdl:choiceBranchKey="9" />
+      <xs:element name="symlink"      type="nfsv3:symlink"      dfdl:choiceBranchKey="10" />
+      <xs:element name="mknod"        type="nfsv3:mknod"        dfdl:choiceBranchKey="11" />
+      <xs:element name="remove"       type="nfsv3:remove"       dfdl:choiceBranchKey="12" />
+      <xs:element name="rmdir"        type="nfsv3:rmdir"        dfdl:choiceBranchKey="13" />
+      <xs:element name="rename"       type="nfsv3:rename"       dfdl:choiceBranchKey="14" />
+      <xs:element name="link"         type="nfsv3:link"         dfdl:choiceBranchKey="15" />
+      <xs:element name="readdir"      type="nfsv3:readdir"      dfdl:choiceBranchKey="16" />
+      <xs:element name="readdirplus"  type="nfsv3:readdirplus"  dfdl:choiceBranchKey="17" />
+      <xs:element name="fsstat"       type="nfsv3:fsstat"       dfdl:choiceBranchKey="18" />
+      <xs:element name="fsinfo"       type="nfsv3:fsinfo"       dfdl:choiceBranchKey="19" />
+      <xs:element name="pathconf"     type="nfsv3:pathconf"     dfdl:choiceBranchKey="20" />
+      <xs:element name="commit"       type="nfsv3:commit"       dfdl:choiceBranchKey="21" />
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Cmd 0 - NULL: Do nothing -->
+
+  <xs:complexType name="null">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Cmd 1 - GETATTR: Get file attributes -->
+
+  <xs:complexType name="getattr">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:nfs_fh3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 2 - SETATTR: Set file attributes -->
+
+  <xs:complexType name="setattr">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:nfs_fh3" />
+      <!-- setattr is missing these elements
+      <xs:element name="new_attributes" type="nfsv3:sattr3" />
+      <xs:element name="guard" type="nfsv3:sattrguard3" />
+      -->
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 3 - LOOKUP: Lookup filename -->
+
+  <xs:complexType name="lookup">
+    <xs:sequence>
+      <xs:element name="what" type="nfsv3:diropargs3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 4 - ACCESS: Check access permission -->
+
+  <xs:complexType name="access">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:nfs_fh3" />
+      <xs:element name="access" type="nfsv3:uint32" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 5 - READLINK: Read from symbolic link -->
+
+  <xs:complexType name="readlink">
+    <xs:sequence>
+      <xs:element name="symlink" type="nfsv3:nfs_fh3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 6 - READ: Read from file -->
+
+  <xs:complexType name="read">
+    <xs:sequence>
+      <xs:element name="file" type="nfsv3:nfs_fh3" />
+      <xs:element name="offset" type="nfsv3:offset3" />
+      <xs:element name="count" type="nfsv3:count3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 7 - WRITE: Write to file -->
+
+  <xs:complexType name="write">
+    <xs:sequence>
+      <xs:element name="file" type="nfsv3:nfs_fh3" />
+      <xs:element name="offset" type="nfsv3:offset3" />
+      <xs:element name="count" type="nfsv3:count3" />
+      <xs:element name="stable" type="nfsv3:stable_how" />
+      <xs:element name="data" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 8 - CREATE: Create a file -->
+
+  <xs:complexType name="create">
+    <xs:sequence>
+      <xs:element name="where" type="nfsv3:diropargs3" />
+      <xs:element name="how" type="nfsv3:createhow3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 9 - MKDIR: Create a directory -->
+
+  <xs:complexType name="mkdir">
+    <xs:sequence>
+      <xs:element name="where" type="nfsv3:diropargs3" />
+      <xs:element name="attributes" type="nfsv3:sattr3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 10 - SYMLINK: Create a symbolic link -->
+
+  <xs:complexType name="symlink">
+    <xs:sequence>
+      <xs:element name="where" type="nfsv3:diropargs3" />
+      <xs:element name="symlink" type="nfsv3:symlinkdata3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 11 - MKNOD: Create a special device -->
+
+  <xs:complexType name="mknoddata3">
+    <xs:sequence>
+      <xs:element name="type" type="xdr:unsignedInt" />
+      <xs:element name="mknod_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../type) }">
+            <xs:element name="chr_device" type="nfsv3:devicedata3" dfdl:choiceBranchKey="3" /><!--NF3CHR-->
+            <xs:element name="blk_device" type="nfsv3:devicedata3" dfdl:choiceBranchKey="4" /><!--NF3BLK-->
+            <xs:element name="sock_pipe_attributes" type="nfsv3:sattr3" dfdl:choiceBranchKey="6" /><!--NF3SOCK-->
+            <xs:element name="fifo_pipe_attributes" type="nfsv3:sattr3" dfdl:choiceBranchKey="7" /><!--NF3FIFO-->
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="mknod">
+    <xs:sequence>
+      <xs:element name="where" type="nfsv3:diropargs3" />
+      <xs:element name="what"  type="nfsv3:mknoddata3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 12 - REMOVE: Remove a file -->
+
+  <xs:complexType name="remove">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:diropargs3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 13 - RMDIR: Remove a directory -->
+
+  <xs:complexType name="rmdir">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:diropargs3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 14 - RENAME: Rename a file or directory -->
+
+  <xs:complexType name="rename">
+    <xs:sequence>
+      <xs:element name="from" type="nfsv3:diropargs3" />
+      <xs:element name="to" type="nfsv3:diropargs3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 15 - LINK: Create link to an object -->
+
+  <xs:complexType name="link">
+    <xs:sequence>
+      <xs:element name="file" type="nfsv3:nfs_fh3" />
+      <xs:element name="link" type="nfsv3:diropargs3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 16 - READDIR: Read From directory -->
+
+  <xs:complexType name="readdir">
+    <xs:sequence>
+      <xs:element name="dir" type="nfsv3:nfs_fh3" />
+      <xs:element name="cookie" type="nfsv3:cookie3" />
+      <xs:element name="cookieverf" type="nfsv3:cookieverf3" />
+      <xs:element name="count" type="nfsv3:count3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 17 - READDIRPLUS: Extended read from directory -->
+
+  <xs:complexType name="readdirplus">
+    <xs:sequence>
+      <xs:element name="dir" type="nfsv3:nfs_fh3" />
+      <xs:element name="cookie" type="nfsv3:cookie3" />
+      <xs:element name="cookieverf" type="nfsv3:cookieverf3" />
+      <xs:element name="dircount" type="nfsv3:count3" />
+      <xs:element name="maxcount" type="nfsv3:count3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 18 - FSSTAT: Get dynamic file system information -->
+
+  <xs:complexType name="fsstat">
+    <xs:sequence>
+      <xs:element name="fsroot" type="nfsv3:nfs_fh3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 19 - FSINFO: Get static file system information -->
+
+  <xs:complexType name="fsinfo">
+    <xs:sequence>
+      <xs:element name="fsroot" type="nfsv3:nfs_fh3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 20 - PATHCONF: Retrieve POSIX information -->
+
+  <xs:complexType name="pathconf">
+    <xs:sequence>
+      <xs:element name="object" type="nfsv3:nfs_fh3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cmd 21 - COMMIT: Commit cached data on a server to stable storage  -->
+
+  <xs:complexType name="commit">
+    <xs:sequence>
+      <xs:element name="file"   type="nfsv3:nfs_fh3" />
+      <xs:element name="offset" type="nfsv3:offset3" />
+      <xs:element name="count"  type="nfsv3:count3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NFSv3 specific types -->
+
+  <xs:simpleType name="NFS3_FHSIZE">
+    <xs:restriction base="nfsv3:uint32">
+      <xs:enumeration value="64"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+<xs:simpleType name="stable_how">
+  <xs:restriction base="xdr:unsignedInt">
+    <xs:totalDigits value="1" />
+    <xs:minInclusive value="0" />
+    <xs:maxInclusive value="2" />
+  </xs:restriction>
+</xs:simpleType>
+
+  <xs:complexType name="nfs_fh3">
+    <xs:sequence>
+      <!-- Should be named "data", not "fh_data" -->
+      <xs:element name="fh_data" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="diropargs3">
+    <xs:sequence>
+      <xs:element name="dir" type="nfsv3:nfs_fh3" />
+      <xs:element name="name" type="nfsv3:filename3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="createhow3">
+    <xs:sequence>
+      <xs:element name="mode" type="xdr:unsignedInt" />
+      <xs:element name="create_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mode) }">
+            <xs:element name="obj_attributes0" type="nfsv3:sattr3" dfdl:choiceBranchKey="0" />
+            <xs:element name="obj_attributes1" type="nfsv3:sattr3" dfdl:choiceBranchKey="1" />
+            <xs:element name="verf" type="nfsv3:createverf3" dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfstime3">
+    <xs:sequence>
+      <xs:element name="seconds"  type="nfsv3:uint32" />
+      <xs:element name="nseconds" type="nfsv3:uint32" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sattr3">
+    <xs:sequence>
+      <xs:element name="set_it_mode" type="xdr:bool" />
+      <xs:element name="mode" type="nfsv3:mode3" minOccurs="0" maxOccurs="1" dfdl:occursCountKind="expression" dfdl:occursCount="{ xs:long(../set_it_mode) }" />
+      <xs:element name="set_it_uid" type="xdr:bool" />
+      <xs:element name="uid" type="nfsv3:uid3" minOccurs="0" maxOccurs="1" dfdl:occursCountKind="expression" dfdl:occursCount="{ xs:long(../set_it_uid) }" />
+      <xs:element name="set_it_gid" type="xdr:bool" />
+      <xs:element name="gid" type="nfsv3:gid3" minOccurs="0" maxOccurs="1" dfdl:occursCountKind="expression" dfdl:occursCount="{ xs:long(../set_it_gid) }" />
+      <xs:element name="set_it_size" type="xdr:bool" />
+      <xs:element name="size" type="nfsv3:size3" minOccurs="0" maxOccurs="1" dfdl:occursCountKind="expression" dfdl:occursCount="{ xs:long(../set_it_size) }" />
+      <xs:element name="set_it_atime" type="xdr:unsignedInt" />
+      <xs:element name="atime_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../set_it_atime) }" >
+            <xs:element name="void0" type="xdr:void" dfdl:choiceBranchKey="0" />
+            <xs:element name="void1" type="xdr:void" dfdl:choiceBranchKey="1" />
+            <xs:element name="atime" type="nfsv3:nfstime3" dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="set_it_mtime" type="xdr:unsignedInt" />
+      <xs:element name="mtime_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../set_it_mtime) }" >
+            <xs:element name="void0" type="xdr:void" dfdl:choiceBranchKey="0" />
+            <xs:element name="void1" type="xdr:void" dfdl:choiceBranchKey="1" />
+            <xs:element name="mtime" type="nfsv3:nfstime3" dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="symlinkdata3">
+    <xs:sequence>
+      <xs:element name="symlink_attributes" type="nfsv3:sattr3" />
+      <xs:element name="symlink_data" type="nfsv3:nfspath3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="specdata3">
+    <xs:sequence>
+      <xs:element name="specdata1" type="nfsv3:uint32" />
+      <xs:element name="specdata2" type="nfsv3:uint32" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="devicedata3">
+    <xs:sequence>
+      <xs:element name="dev_attributes" type="nfsv3:sattr3" />
+      <xs:element name="spec" type="nfsv3:specdata3" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- MOUNTD commands start here -->
+
+  <xs:complexType name="dirpath">
+    <xs:group ref="xdr:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="mountd">
+    <xs:choice dfdl:choiceDispatchKey="{ xs:string(../../../proc) }">
+      <xs:element name="mountd_null"    type="nfsv3:mountd_null"    dfdl:choiceBranchKey="0" />
+      <xs:element name="mountd_mt"      type="nfsv3:mountd_mt"      dfdl:choiceBranchKey="1" />
+      <xs:element name="mountd_dump"    type="nfsv3:mountd_dump"    dfdl:choiceBranchKey="2" />
+      <xs:element name="mountd_umt"     type="nfsv3:mountd_umt"     dfdl:choiceBranchKey="3" />
+      <xs:element name="mountd_umntall" type="nfsv3:mountd_umntall" dfdl:choiceBranchKey="4" />
+      <xs:element name="mountd_export"  type="nfsv3:mountd_export"  dfdl:choiceBranchKey="5" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_null">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_mt">
+    <xs:sequence>
+      <xs:element name="mountPath" type="nfsv3:dirpath" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_dump">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_umt">
+    <xs:sequence>
+      <xs:element name="unmountPath" type="nfsv3:dirpath" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_umntall">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_export">
+    <xs:sequence/>
+  </xs:complexType>
+
+</xs:schema>

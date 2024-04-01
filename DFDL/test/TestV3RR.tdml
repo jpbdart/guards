@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<tdml:testSuite
+  defaultRoundTrip="onePass"
+  description="NFSv3 RR tests"
+  suiteName="TestV3RR"
+  xmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext"
+  xmlns:tdml="http://www.ibm.com/xmlns/dfdl/testData"
+  defaultValidation="on">
+
+  <!--
+      Run the tests (try with -I daffodilC too):
+      DAFFODIL_CLASSPATH=../src daffodil test -i -I daffodil TestV3RR.tdml
+
+      Write the XML infosets:
+      bash -x -c 'for f in v3RRdata/*; do DAFFODIL_CLASSPATH=../src daffodil parse -r RqstRply -s RequestReplyV3.dfdl.xsd -o $f.xml $f; done'
+
+      Test the C code generator:
+      DAFFODIL_CLASSPATH=../src daffodil generate c -r RqstRply -s RequestReplyV3.dfdl.xsd
+  -->
+
+  <tdml:parserTestCase name="portmap_mount_RR" root="RqstRplyV3" model="RequestReplyV3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v3RRdata/portmap_mount_RR.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v3RRinfosets/portmap_mount_RR.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_null_RR" root="RqstRplyV3" model="RequestReplyV3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v3RRdata/mountd_null_RR.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <!--
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v3RRinfosets/mountd_null_RR.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+    -->
+    <tdml:errors>
+      <tdml:error>Insufficient bits</tdml:error>
+    </tdml:errors>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_mnt_RR" root="RqstRplyV3" model="RequestReplyV3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v3RRdata/mountd_mnt_RR.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v3RRinfosets/mountd_mnt_RR.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+</tdml:testSuite>

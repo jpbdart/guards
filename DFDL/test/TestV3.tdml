@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<tdml:testSuite
+  defaultRoundTrip="onePass"
+  description="ONC-RPC tests"
+  suiteName="TestV3"
+  xmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext"
+  xmlns:tdml="http://www.ibm.com/xmlns/dfdl/testData"
+  defaultValidation="on">
+
+  <!--
+      Run the tests (try with -I daffodilC too):
+      DAFFODIL_CLASSPATH=../src daffodil test -i -I daffodil TestV3.tdml
+
+      Write the XML infosets:
+      bash -x -c 'for f in data/*; do DAFFODIL_CLASSPATH=../src daffodil parse -r onc_rpc3 -s oncrpcv3.dfdl.xsd -o $f.xml $f; done'
+
+      Test the C code generator:
+      DAFFODIL_CLASSPATH=../src daffodil generate c -r onc_rpc3 -s oncrpcv3.dfdl.xsd
+  -->
+
+  <tdml:parserTestCase name="onc_progversion_error" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/onc_progversion_err.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:errors>
+      <tdml:error>failed to match</tdml:error>
+    </tdml:errors>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="onc_rpcversion_error" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/onc_rpcversion_err.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:errors>
+      <tdml:error></tdml:error>
+      <!--
+      <tdml:error>RPC version not equal to 2</tdml:error>
+      -->
+    </tdml:errors>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="onc_program_error" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/onc_program_err.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:errors>
+      <tdml:error>failed to match</tdml:error>
+    </tdml:errors>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="portmap_mount_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/portmap_mount_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/portmap_mount_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="portmap_mount_rply" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/portmap_mount_rply.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/portmap_mount_rply.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_null_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_null_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_null_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_mnt_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_mnt_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_mnt_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_umnt_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_umnt_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_umnt_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_umnt_error" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_umnt_err_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:errors>
+      <tdml:error>failed to match</tdml:error>
+    </tdml:errors>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_dump_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_dump_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_dump_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_umntall_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_umntall_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_umntall_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="mountd_export_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/mountd_export_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/mountd_export_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_create_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_create_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_create_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_fsinfo_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_fsinfo_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_fsinfo_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_fsstat_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_fsstat_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_fsstat_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_getattr_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_getattr_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_getattr_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_lookup1_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_lookup1_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_lookup1_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_lookup2_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_lookup2_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_lookup2_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_pathconf_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_pathconf_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_pathconf_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_access_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_access_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_access_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_link_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_link_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_link_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_mkdir_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_mkdir_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_mkdir_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_readdir_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_readdir_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_readdir_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_readdirplus_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_readdirplus_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_readdirplus_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_read_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_read_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_read_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_readlink_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_readlink_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_readlink_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_remove_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_remove_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_remove_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_rename_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_rename_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_rename_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_rmdir_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_rmdir_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_rmdir_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_symlink_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_symlink_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_symlink_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="nfs_write_call" root="onc_rpc3" model="oncrpcv3.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">data/nfs_write_call.rfc1831</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">infosets/nfs_write_call.rfc1831.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+</tdml:testSuite>

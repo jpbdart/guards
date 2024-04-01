@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpc:onc_rpc xmlns:oncrpc="urn:oncrpc">
+  <recfragment>
+    <dataSize xmlns="">2147483824</dataSize>
+  </recfragment>
+  <xid>1872597887</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">4</vers>
+      <proc xmlns="">1</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>72</authlen>
+            <stamp>0</stamp>
+            <machineName>
+              <strValue>6575726F7061</strValue>
+            </machineName>
+            <uid>1000</uid>
+            <gid>1000</gid>
+            <auxGIDElements>11</auxGIDElements>
+            <GIDValues>4</GIDValues>
+            <GIDValues>24</GIDValues>
+            <GIDValues>27</GIDValues>
+            <GIDValues>30</GIDValues>
+            <GIDValues>46</GIDValues>
+            <GIDValues>116</GIDValues>
+            <GIDValues>126</GIDValues>
+            <GIDValues>137</GIDValues>
+            <GIDValues>144</GIDValues>
+            <GIDValues>1000</GIDValues>
+            <GIDValues>1001</GIDValues>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none>
+            <authlen>
+              <opaque></opaque>
+            </authlen>
+          </auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <nfsv4>
+          <compound>
+            <tag>
+              <opaque></opaque>
+            </tag>
+            <minorversion>0</minorversion>
+            <numargs>2</numargs>
+            <nfscmd>
+              <opcode>22</opcode>
+              <op_dispatch>
+                <putfh>
+                  <object>
+                    <opaque>0100070001005003000000004797576ABAAC4E8D811973207E27CA94</opaque>
+                  </object>
+                </putfh>
+              </op_dispatch>
+            </nfscmd>
+            <nfscmd>
+              <opcode>9</opcode>
+              <op_dispatch>
+                <getattr>
+                  <numargs>2</numargs>
+                  <attr_request>1048858</attr_request>
+                  <attr_request>11575866</attr_request>
+                </getattr>
+              </op_dispatch>
+            </nfscmd>
+          </compound>
+        </nfsv4>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpc:onc_rpc>

@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+RFC7530 - NFSv4
+
+Author: J Peter Brady
+
+DFDL implementation of NFSv4 based on RFC 7530. Element names have been
+used that mimic the ones used in the specification.
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:nfsv4"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:dfdlx="http://www.ogf.org/dfdl/dfdl-1.0/extensions"
+  xmlns:net="urn:network/format"
+  xmlns:v4="urn:nfsv4"
+  xmlns:v4c="urn:nfsv4Common"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- XDR: External Data Representation -->
+
+  <xs:import namespace="urn:xdr" schemaLocation="xdr.dfdl.xsd"/>
+  <xs:import namespace="urn:nfsv4Common" schemaLocation="nfsv4Common.dfdl.xsd"/>
+
+<!-- Call entry/dispatch table from rfc1831. The key was parsed as part of the initial ONC RPC -->
+
+ <xs:complexType name="nfsv4">
+    <xs:choice><!--dfdl:choiceDispatchKey="{ xs:string(../../proc) }"-->
+      <!--
+      <xs:element name="null"         type="v4:null"         dfdl:choiceBranchKey="0" />
+      -->
+      <xs:element name="compound"     type="v4:compound" /><!--dfdl:choiceBranchKey="1"-->
+    </xs:choice>
+  </xs:complexType>
+
+  <!--
+  The NFSv4 operations are sent in a COMPOUND procedure. The operations are just
+  bunched together so we'll read each command and process the data. If we get out
+  of sync there is no way to recover.
+  -->
+
+  <xs:complexType name="nfsv4_ops">
+    <xs:sequence>
+      <xs:element name="opcode" type="xdr:unsignedInt" />
+      <xs:element name="op_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../opcode) }">
+            <xs:element name="access"       type="v4:access"       dfdl:choiceBranchKey="3" />
+            <xs:element name="close"        type="v4:close"        dfdl:choiceBranchKey="4" /> <!-- new -->
+            <xs:element name="commit"       type="v4:commit"       dfdl:choiceBranchKey="5" />
+            <xs:element name="create"       type="v4:create"       dfdl:choiceBranchKey="6" />
+            <xs:element name="delegpurge"   type="v4:delegpurge"   dfdl:choiceBranchKey="7" /> <!-- new -->
+            <xs:element name="delegreturn"  type="v4:delegreturn"  dfdl:choiceBranchKey="8" /> <!-- new -->
+            <xs:element name="getattr"      type="v4:getattr"      dfdl:choiceBranchKey="9" />
+            <xs:element name="getfh"        type="v4:getfh"        dfdl:choiceBranchKey="10" /> <!-- new -->
+            <xs:element name="link"         type="v4:link"         dfdl:choiceBranchKey="11" />
+            <xs:element name="lockt"        type="v4:lockt"        dfdl:choiceBranchKey="12" /> <!-- new -->
+            <xs:element name="locku"        type="v4:locku"        dfdl:choiceBranchKey="13" /> <!-- new -->
+            <xs:element name="lock"         type="v4:lock"         dfdl:choiceBranchKey="14" /> <!-- new -->
+            <xs:element name="lookup"       type="v4:lookup"       dfdl:choiceBranchKey="15" />
+            <xs:element name="lookupp"      type="v4:lookupp"      dfdl:choiceBranchKey="16" /> <!-- new -->
+            <xs:element name="nverify"      type="v4:nverify"      dfdl:choiceBranchKey="17" /> <!-- new -->
+            <xs:element name="open"         type="v4:open"         dfdl:choiceBranchKey="18" /> <!-- new -->
+            <xs:element name="openattr"     type="v4:openattr"     dfdl:choiceBranchKey="19" /> <!-- new -->
+            <xs:element name="open_confirm" type="v4:open_confirm" dfdl:choiceBranchKey="20" /> <!-- new -->
+            <xs:element name="open_downgrade" type="v4:open_downgrade" dfdl:choiceBranchKey="21" /> <!-- new -->
+            <xs:element name="putfh"        type="v4:putfh"        dfdl:choiceBranchKey="22" /> <!-- new -->
+            <xs:element name="putpubfh"     type="v4:putpubfh"     dfdl:choiceBranchKey="23" /> <!-- new -->
+            <xs:element name="putrootfh"    type="v4:putrootfh"    dfdl:choiceBranchKey="24" /> <!-- new -->
+            <xs:element name="read"         type="v4:read"         dfdl:choiceBranchKey="25" />
+            <xs:element name="readdir"      type="v4:readdir"      dfdl:choiceBranchKey="26" />
+            <xs:element name="readlink"     type="v4:readlink"     dfdl:choiceBranchKey="27" />
+            <xs:element name="remove"       type="v4:remove"       dfdl:choiceBranchKey="28" />
+            <xs:element name="rename"       type="v4:rename"       dfdl:choiceBranchKey="29" />
+            <xs:element name="renew"        type="v4:renew"        dfdl:choiceBranchKey="30" /> <!-- new -->
+            <xs:element name="restorefh"    type="v4:restorefh"    dfdl:choiceBranchKey="31" /> <!-- new -->
+            <xs:element name="savefh"       type="v4:savefh"       dfdl:choiceBranchKey="32" /> <!-- new -->
+            <xs:element name="secinfo"      type="v4:secinfo"      dfdl:choiceBranchKey="33" /> <!-- new -->
+            <xs:element name="setattr"      type="v4:setattr"      dfdl:choiceBranchKey="34" />
+            <xs:element name="setclientid"  type="v4:setclientid"  dfdl:choiceBranchKey="35" /> <!-- new -->
+            <xs:element name="setclientid_confirm" type="v4:setclientid_confirm" dfdl:choiceBranchKey="36" /> <!-- new -->
+            <xs:element name="verify"       type="v4:verify"       dfdl:choiceBranchKey="37" /> <!-- new -->
+            <xs:element name="write"        type="v4:write"        dfdl:choiceBranchKey="38" />
+            <xs:element name="release_lockowner" type="v4:release_lockowner" dfdl:choiceBranchKey="39" /> <!-- new -->
+            <!-- NFS v4.1 command additions -->
+            <xs:element name="backchannel_ctl" type="v4:backchannel_ctl" dfdl:choiceBranchKey="40" />
+            <xs:element name="bind_conn_to_session" type="v4:bind_conn_to_session" dfdl:choiceBranchKey="41" />
+            <xs:element name="exchange_id"  type="v4:exchange_id"  dfdl:choiceBranchKey="42" />
+            <xs:element name="create_session" type="v4:create_session" dfdl:choiceBranchKey="43" />
+            <xs:element name="destroy_session" type="v4:destroy_session" dfdl:choiceBranchKey="44" />
+            <xs:element name="free_stateid"  type="v4:free_stateid" dfdl:choiceBranchKey="45" />
+            <xs:element name="get_dir_delegation" type="v4:get_dir_delegation" dfdl:choiceBranchKey="46" />
+            <xs:element name="getdeviceinfo" type="v4:getdeviceinfo" dfdl:choiceBranchKey="47" />
+            <xs:element name="getdevicelist" type="v4:getdevicelist" dfdl:choiceBranchKey="48" />
+            <xs:element name="layoutcommit"  type="v4:layoutcommit"  dfdl:choiceBranchKey="49" />
+            <xs:element name="layoutget"     type="v4:layoutget"    dfdl:choiceBranchKey="50" />
+            <xs:element name="layoutreturn"  type="v4:layoutreturn" dfdl:choiceBranchKey="51" />
+            <xs:element name="secinfo_no_name" type="v4:secinfo_no_name" dfdl:choiceBranchKey="52" />
+            <xs:element name="sequence"      type="v4:sequence"     dfdl:choiceBranchKey="53" />
+            <xs:element name="set_ssv"       type="v4:set_ssv"      dfdl:choiceBranchKey="54" />
+            <xs:element name="test_stateid"  type="v4:test_stateid" dfdl:choiceBranchKey="55" />
+            <xs:element name="want_delegation" type="v4:want_delegation" dfdl:choiceBranchKey="56" />
+            <xs:element name="destroy_clientid" type="v4:destroy_clientid" dfdl:choiceBranchKey="57" />
+            <xs:element name="reclaim_complete" type="v4:reclaim_complete" dfdl:choiceBranchKey="58" />
+            <!-- NFS v4.2 command additions -->
+            <xs:element name="allocate"     type="v4:allocate"     dfdl:choiceBranchKey="59" />
+            <xs:element name="copy"         type="v4:copy"         dfdl:choiceBranchKey="60" />
+            <xs:element name="copy_notify"  type="v4:copy_notify"  dfdl:choiceBranchKey="61" />
+            <xs:element name="deallocate"   type="v4:deallocate"   dfdl:choiceBranchKey="62" />
+            <xs:element name="io_advise"    type="v4:io_advise"    dfdl:choiceBranchKey="63" />
+            <xs:element name="layouterror"  type="v4:layouterror"  dfdl:choiceBranchKey="64" />
+            <xs:element name="layoutstats"  type="v4:layoutstats"  dfdl:choiceBranchKey="65" />
+            <xs:element name="offload_cancel" type="v4:offload_cancel" dfdl:choiceBranchKey="66" />
+            <xs:element name="offload_status" type="v4:offload_status" dfdl:choiceBranchKey="67" />
+            <xs:element name="read_plus"    type="v4:read_plus"    dfdl:choiceBranchKey="68" />
+            <xs:element name="seek"         type="v4:seek"         dfdl:choiceBranchKey="69" />
+            <xs:element name="write_same"   type="v4:write_same"   dfdl:choiceBranchKey="70" />
+            <xs:element name="clone"        type="v4:clone"        dfdl:choiceBranchKey="71" />
+            <xs:element name="illegal"      type="v4:illegal"      dfdl:choiceBranchKey="10044" /> <!-- new -->
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NFSv4 Procedures -->
+
+  <!-- Proc 0 - NULL: Do nothing -->
+  <!-- No input values or processing needed. -->
+
+  <xs:complexType name="null">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Proc 1 - COMPOUND: Compound Operations -->
+
+  <xs:simpleType name="V_0_1_OR_2">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:totalDigits value="1"/>
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="compound">
+    <xs:sequence>
+      <xs:element name="tag" type="xdr:opaque" />
+      <xs:element name="minorversion" type="xdr:unsignedInt" />
+      <!-- <xs:element name="minorversion" type="v4:V_0_1_OR_2" >
+        <xs:annotation>
+          <xs:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Minor version not equal to 0, 1 or 2" test="{ dfdl:checkConstraints(../minorversion) }" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element> -->
+
+      <xs:element name="numargs" type="xdr:unsignedInt" />
+      <!-- Not in spec what the max number of commands is. I've set it to 16. The size is a function
+           of the network MTU, the max RPC message size set on the server, and client buffer size.
+      -->
+      <xs:element name="nfscmd" type="v4:nfsv4_ops" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{ ../numargs }" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NFSv4 Operations -->
+
+  <!-- Op 3: ACCESS - Check Access Rights -->
+
+  <xs:complexType name="access">
+    <xs:sequence>
+      <xs:element name="check_access" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 4: CLOSE - Close File -->
+
+  <xs:complexType name="close">
+    <xs:sequence>
+      <xs:element name="seqid" type="v4c:seqid4" />
+      <xs:element name="open_stateid" type="v4c:stateid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 5: COMMIT - Commit Cached Data -->
+
+  <xs:complexType name="commit">
+    <xs:sequence>
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="count" type="v4c:count4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 6: CREATE - Create a Non-regular File Object -->
+  <!-- component4 replaced by opaque -->
+
+  <xs:complexType name="create">
+    <xs:sequence>
+      <xs:element name="objtype" type="v4c:createtype4" />
+      <xs:element name="objname" type="xdr:opaque" />
+      <xs:element name="createattrs" type="v4c:fattr4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 7: DELEGPURGE - Purge Delegations Awaiting Recovery -->
+
+  <xs:complexType name="delegpurge">
+    <xs:sequence>
+      <xs:element name="clientid" type="v4c:clientid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 8: DELEGRETURN - Return Delegation -->
+
+  <xs:complexType name="delegreturn">
+    <xs:sequence>
+      <xs:element name="deleg_stateid" type="v4c:stateid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 9: GETATTR - Get Attributes -->
+
+  <xs:complexType name="getattr">
+    <xs:sequence>
+      <xs:element name="numargs" type="xdr:unsignedInt" />
+      <xs:element name="attr_request" type="xdr:unsignedInt" minOccurs="0" maxOccurs="16"
+        dfdl:occursCountKind="expression" dfdl:occursCount="{ ../numargs }" />
+	    <!-- <xs:element name="attr_data" type="xdr:opaque" /> -->
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 10: GETFH - Get Current Filehandle -->
+
+  <!-- No parameter for request. -->
+
+  <xs:complexType name="getfh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 11: LINK - Create Link to a File -->
+
+  <xs:complexType name="link">
+    <xs:sequence>
+      <xs:element name="newname" type="v4c:component4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 12: LOCK - Create Lock -->
+
+  <xs:complexType name="lock">
+    <xs:sequence>
+      <xs:element name="locktype" type="v4c:nfs_lock_type4" />
+      <xs:element name="reclaim" type="xdr:bool" />
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="length" type="v4c:length4" />
+      <xs:element name="locker" type="v4c:locker4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 13: LOCKT - Test for Lock -->
+
+  <xs:complexType name="lockt">
+    <xs:sequence>
+      <xs:element name="locktype" type="v4c:nfs_lock_type4" />
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="length" type="v4c:length4" />
+      <xs:element name="owner" type="v4c:state_owner4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 14: LOCKU - Unlock File -->
+
+  <xs:complexType name="locku">
+    <xs:sequence>
+      <xs:element name="locktype" type="v4c:nfs_lock_type4" />
+      <xs:element name="seqid" type="v4c:seqid4" />
+      <xs:element name="lock_stateid" type="v4c:stateid4" />
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="length" type="v4c:length4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 15: LOOKUP - Look Up Filename -->
+
+  <xs:complexType name="lookup">
+    <xs:sequence>
+      <xs:element name="name" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 16: LOOKUPP - Look Up Parent Directory -->
+  <!-- request side has no other arguments -->
+
+  <xs:complexType name="lookupp">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 17: NVERIFY - Verify Difference in Attributes -->
+
+  <xs:complexType name="nverify">
+    <xs:sequence>
+      <xs:element name="obj_attributes" type="v4c:fattr4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 18: OPEN - Open a Regular File -->
+
+  <xs:complexType name="open">
+    <xs:sequence>
+      <xs:element name="seqid" type="v4c:seqid4" />
+      <xs:element name="share_access" type="xdr:unsignedInt" />
+      <xs:element name="share_deny" type="xdr:unsignedInt" />
+      <xs:element name="owner" type="v4c:open_owner4" />
+      <xs:element name="openhow" type="v4c:openflag4" />
+      <xs:element name="claim" type="v4c:open_claim4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 19: OPENATTR - Open Named Attribute Directory -->
+
+  <xs:complexType name="openattr">
+    <xs:sequence>
+      <xs:element name="createdir" type="xdr:bool" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 20: OPEN_CONFIRM - Confirm Open -->
+
+  <xs:complexType name="open_confirm">
+    <xs:sequence>
+      <xs:element name="open_stateid" type="v4c:stateid4" />
+      <xs:element name="seqid" type="v4c:seqid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 21: OPEN_DOWNGRADE - Reduce Open File Access -->
+
+  <xs:complexType name="open_downgrade">
+    <xs:sequence>
+      <xs:element name="open_stateid" type="v4c:stateid4" />
+      <xs:element name="seqid" type="v4c:seqid4" />
+      <xs:element name="share_access" type="xdr:unsignedInt" />
+      <xs:element name="share_deny" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 22: PUTFH - Set Current Filehandle -->
+
+  <xs:complexType name="putfh">
+    <xs:sequence>
+      <xs:element name="object" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 23: PUTPUBFH - Set Public Filehandle -->
+  <!-- Has no input variables -->
+
+  <xs:complexType name="putpubfh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 24: PUTROOTFH - Set Root Filehandle -->
+  <!-- Has no input variables -->
+
+  <xs:complexType name="putrootfh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 25: READ - Read from File -->
+
+  <xs:complexType name="read">
+    <xs:sequence>
+      <xs:element name="stateid" type="v4c:stateid4" />
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="count" type="v4c:count4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 26: READDIR - Read Directory -->
+
+  <xs:complexType name="readdir">
+    <xs:sequence>
+      <xs:element name="cookie" type="v4c:nfs_cookie4" />
+      <xs:element name="cookieverf" type="v4c:verifier4" />
+      <xs:element name="dircount" type="v4c:count4" />
+      <xs:element name="maxcount" type="v4c:count4" />
+      <xs:element name="attr_request" type="v4c:bitmap4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 27: READLINK - Read Symbolic Link -->
+  <!-- Has no input variables -->
+
+  <xs:complexType name="readlink">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 28: REMOVE - Remove File System Object -->
+
+  <xs:complexType name="remove">
+    <xs:sequence>
+      <xs:element name="target" type="v4c:component4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 29: RENAME - Rename Directory Entry -->
+
+  <xs:complexType name="rename">
+    <xs:sequence>
+      <xs:element name="oldname" type="v4c:component4" />
+      <xs:element name="newname" type="v4c:component4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 30: RENEW - Renew a Lease -->
+
+  <xs:complexType name="renew">
+    <xs:sequence>
+      <xs:element name="clientid" type="v4c:clientid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 31: RESTOREFH - Restore Saved Filehandle -->
+  <!-- No input variables -->
+
+  <xs:complexType name="restorefh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 32: SAVEFH - Save Current Filehandle -->
+  <!-- No input variables -->
+
+  <xs:complexType name="savefh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 33: SECINFO - Obtain Available Security -->
+
+  <xs:complexType name="secinfo">
+    <xs:sequence>
+      <xs:element name="name" type="v4c:component4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 34: SETATTR - Set Attributes -->
+
+  <xs:complexType name="setattr">
+    <xs:sequence>
+      <xs:element name="stateid" type="v4c:stateid4" />
+      <xs:element name="obj_attributes" type="v4c:fattr4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 35: SETCLIENTID - Negotiate Client ID -->
+
+  <xs:complexType name="setclientid">
+    <xs:sequence>
+      <xs:element name="client" type="v4c:nfs_client_id4" />
+      <xs:element name="callback" type="v4c:cb_client4" />
+      <xs:element name="callback_ident" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 36: SETCLIENTID_CONFIRM - Confirm Client ID -->
+
+  <xs:complexType name="setclientid_confirm">
+    <xs:sequence>
+      <xs:element name="clientid" type="v4c:clientid4" />
+      <xs:element name="setclientid_confirm" type="v4c:verifier4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 37: VERIFY - Verify Same Attributes -->
+
+  <xs:complexType name="verify">
+    <xs:sequence>
+      <xs:element name="obj_attributes" type="v4c:fattr4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 38: WRITE - Write to File -->
+
+  <xs:complexType name="write">
+    <xs:sequence>
+      <xs:element name="stateid" type="v4c:stateid4" />
+      <xs:element name="offset" type="v4c:offset4" />
+      <xs:element name="stable" type="v4c:stable_how4" />
+      <xs:element name="data" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 39: RELEASE_LOCKOWNER - Release Lock-Owner State -->
+  <!-- state_owner4 and lock_owner4 are identical -->
+
+
+  <xs:complexType name="release_lockowner">
+    <xs:sequence>
+      <xs:element name="lock_owner" type="v4c:stateid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 40; BACKCHANNEL_CTL - Backchannel Control -->
+
+  <xs:complexType name="backchannel_ctl">
+    <xs:sequence>
+      <xs:element name="bca_cb_program" type="xdr:unsignedInt" />
+      <xs:element name="bca_sec_parms" type="v4c:callback_sec_parms4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 41: BIND_CONN_TO_SESSION - Associate Connection with Session -->
+
+  <xs:complexType name="bind_conn_to_session">
+    <xs:sequence>
+      <xs:element name="bctsa_sessid" type="v4c:sessionid4" />
+      <xs:element name="bctsa_dir" type="xdr:unsignedInt" />
+      <xs:element name="bctsa_use_conn_in_rdma_mode" type="xdr:bool" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 42: EXCHANGE_ID - Instantiate Client ID -->
+
+  <xs:complexType name="exchange_id">
+    <xs:sequence>
+      <xs:element name="eia_clientowner" type="v4c:client_owner4" />
+      <xs:element name="eia_flags" type="xdr:unsignedInt" />
+      <xs:element name="eia_state_protect" type="v4c:state_protect4_a" />
+      <xs:element name="exchval" type="xdr:unsignedInt" />
+      <xs:element name="eia_client_impl_id" type="v4c:nfs_impl_id4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 43: CREATE_SESSION - Create New Session and Confirm Client ID -->
+
+  <xs:complexType name="create_session">
+    <xs:sequence>
+      <xs:element name="csa_clientid" type="xdr:unsignedHyper" />
+      <xs:element name="csa_sequence" type="xdr:unsignedInt" />
+      <xs:element name="csa_flags" type="xdr:unsignedInt" />
+      <xs:element name="csa_fore_chan_attrs" type="v4c:channel_attrs4" />
+      <xs:element name="csa_back_chan_attrs" type="v4c:channel_attrs4" />
+      <xs:element name="csa_cb_program" type="xdr:unsignedInt" />
+      <xs:element name="csa_sec_parms" type="v4c:callback_sec_parms4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 44: DESTROY_SESSION - Destroy a Session -->
+
+  <xs:complexType name="destroy_session">
+    <xs:sequence>
+      <xs:element name="dsa_sessionid" type="v4c:sessionid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 45: FREE_STATEID - Free Stateid with No Locks -->
+
+  <xs:complexType name="free_stateid">
+    <xs:sequence>
+      <xs:element name="fsa_stateid" type="v4c:stateid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 46: GET_DIR_DELEGATION - Get a Directory Delegation -->
+
+  <xs:complexType name="get_dir_delegation">
+    <xs:sequence>
+      <xs:element name="gdda_signal_deleg_avail" type="xdr:bool" />
+      <xs:element name="gdda_notification_types" type="v4c:bitmap4" />
+      <xs:element name="gdda_child_attr_delay" type="v4c:nfstime4" />
+      <xs:element name="gdda_dir_attr_delay" type="v4c:nfstime4" />
+      <xs:element name="gdda_child_attribute" type="v4c:bitmap4" />
+      <xs:element name="gdda_dir_attribute" type="v4c:bitmap4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 47: GETDEVICEINFO - Get Device Information -->
+
+  <xs:complexType name="getdeviceinfo">
+    <xs:sequence>
+      <xs:element name="gdia_device_id" type="v4c:deviceid4" />
+      <xs:element name="gdia_layout_type" type="v4c:layouttype4" />
+      <xs:element name="gdia_maxcount" type="v4c:count4" />
+      <xs:element name="gdia_notify_types" type="v4c:bitmap4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 48: GETDEVICELIST - Get All Device Mappings for a File System -->
+
+  <xs:complexType name="getdevicelist">
+    <xs:sequence>
+      <xs:element name="gdla_layout_type" type="v4c:layouttype4" />
+      <xs:element name="gdla_maxdevices" type="v4c:count4" />
+      <xs:element name="gdla_cookie" type="v4c:nfs_cookie4" />
+      <xs:element name="gdla_cookieverf" type="v4c:verifier4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 49: LAYOUTCOMMIT - Commit Writes Made Using a Layout -->
+
+  <xs:complexType name="layoutcommit">
+    <xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 50: LAYOUTGET - Get Layout Information -->
+
+  <xs:complexType name="layoutget">
+    <xs:sequence>
+      <xs:element name="loga_signal_layout_avail" type="xdr:bool" />
+      <xs:element name="loga_layouttype" type="v4c:layouttype4" />
+      <xs:element name="loga_iomode" type="xdr:unsignedInt" />
+      <xs:element name="loga_offset" type="v4c:offset4" />
+      <xs:element name="loga_length" type="v4c:length4" />
+      <xs:element name="loga_minlength" type="v4c:length4" />
+      <xs:element name="loga_stateid" type="v4c:stateid4" />
+      <xs:element name="loga_maxcount" type="v4c:count4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 51: LAYOUTRETURN - Release Layout Information -->
+
+  <xs:complexType name="layoutreturn">
+    <xs:sequence>
+      <xs:element name="lora_reclaim" type="xdr:bool" />
+      <xs:element name="lora_layout_type" type="xdr:unsignedInt" />
+      <xs:element name="lora_iomode" type="xdr:unsignedInt" />
+      <xs:element name="lora_layoutreturn" type="v4c:layoutreturn4sw" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 52: SECINFO_NO_NAME - Get Security on Unnamed Object -->
+
+  <xs:complexType name="secinfo_no_name">
+    <xs:sequence>
+      <xs:element name="args" type="v4c:secinfo_style4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 53: SEQUENCE - Supply Per-Procedure Sequencing and Control -->
+
+  <xs:complexType name="sequence">
+    <xs:sequence>
+      <xs:element name="sa_sessionid" type="v4c:sessionid4" />
+      <xs:element name="sa_sequenceid" type="xdr:unsignedInt" />      <!-- sequenceid4 -->
+      <xs:element name="sa_slotid" type="xdr:unsignedInt" />          <!-- slotid4 -->
+      <xs:element name="sa_highest_slotid" type="xdr:unsignedInt" />  <!-- slotid4 -->
+      <xs:element name="sa_cachethis" type="xdr:bool" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 54: SET_SSV - Update SSV for a Client ID -->
+
+  <xs:complexType name="set_ssv">
+    <xs:sequence>
+      <xs:element name="ssa_ssv" type="xdr:opaque" />
+      <xs:element name="ssa_digest" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 55: TEST_STATEID - Test Stateids for Validity -->
+
+  <xs:complexType name="test_stateid">
+    <xs:sequence>
+      <xs:element name="numargs" type="xdr:unsignedInt" />
+      <xs:element name="ts_stateids" type="v4c:stateid4" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{ ../numargs }" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 56: WANT_DELEGATION - Request Delegation -->
+
+  <xs:complexType name="want_delegation">
+    <xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 57: DESTROY_CLIENTID - Destroy a Client ID -->
+
+  <xs:complexType name="destroy_clientid">
+    <xs:sequence>
+      <xs:element name="dca_clientid" type="v4c:clientid4" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Op 58: RECLAIM_COMPLETE - Indicates Reclaims Finished -->
+
+  <xs:complexType name="reclaim_complete">
+    <xs:sequence>
+      <xs:element name="rca_one_fs" type="xdr:bool" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Begin NFSv4.2 commands -->
+  <!-- Op 59: ALLOCATE - Reserve space in a region of a file -->
+
+  <xs:complexType name="allocate">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 60: COPY - Initiate a server-side copy -->
+
+  <xs:complexType name="copy">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 61: COPY_NOTIFY - Notify a source server of a future copy -->
+
+  <xs:complexType name="copy_notify">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 62: DEALLOCATE - Unreserve space in a region of a file -->
+
+  <xs:complexType name="deallocate">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 63: IO_ADVISE - Send client I/O access pattern hints to the server -->
+
+  <xs:complexType name="io_advise">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 64: LAYOUTERROR - Provide errors for the layout -->
+
+  <xs:complexType name="layouterror">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 65: LAYOUTSTATS - Provide statistics for the layout -->
+
+  <xs:complexType name="layoutstats">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 66: OFFLOAD_CANCEL - Stop an offloaded operation -->
+
+  <xs:complexType name="offload_cancel">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 67: OFFLOAD_STATUS - Poll for the status of an asynchronous operation -->
+
+  <xs:complexType name="offload_status">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 68: READ_PLUS - READ data or holes from a file -->
+
+  <xs:complexType name="read_plus">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 69: SEEK - Find the next data or hole -->
+
+  <xs:complexType name="seek">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 70: WRITE_SAME - WRITE an ADB multiple times to a file  -->
+
+  <xs:complexType name="write_same">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 71: CLONE - Clone a range of a file into another file -->
+
+  <xs:complexType name="clone">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 10044 - ILLEGAL: Illegal op -->
+
+  <xs:complexType name="illegal">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- NFSv4 Callback Procedures -->
+
+  <!-- Proc 0 - CB_NULL: Do nothing -->
+
+  <xs:complexType name="cb_null">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Proc 1 - CB_COMPOUND: Compound Operations -->
+
+  <xs:complexType name="cb_compound">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- NFSv4.1 Callback Operations -->
+
+  <!-- Op 3: GETATTR - Get Attributes -->
+
+  <xs:complexType name="cb_getattr">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 4: CB_RECALL - Recall an Open Delegation -->
+
+  <xs:complexType name="cb_recall">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 5: CB_LAYOUTRECALL - Recall Layout from Client -->
+
+  <xs:complexType name="cb_layoutrecall">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 6: CB_NOTIFY - Notify Client of Directory Changes -->
+
+  <xs:complexType name="cb_notify">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 7: CB_PUSH_DELEG - Offer Previously Requested Delegation to Client -->
+
+  <xs:complexType name="cb_push_deleg">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 8: CB_RECALL_ANY - Keep Any N Recallable Objects -->
+
+  <xs:complexType name="cb_recall_any">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 9: CB_RECALLABLE_OBJ_AVAIL - Signal Resources for Recallable Objects -->
+
+  <xs:complexType name="cb_recallable_obj_avail">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 10: CB_RECALL_SLOT - Change Flow Control Limits -->
+
+  <xs:complexType name="cb_recall_slot">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 11: CB_SEQUENCE - Supply Backchannel Sequencing and Control -->
+
+  <xs:complexType name="cb_sequence">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 12: CB_WANTS_CANCELLED - Cancel Pending Delegation Wants -->
+
+  <xs:complexType name="cb_wants_cancelled">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 13: CB_NOTIFY_LOCK - Notify Client of Possible Lock Availability -->
+
+  <xs:complexType name="cb_notify_lock">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 14: CB_NOTIFY_DEVICEID - Notify Client of Device ID Changes -->
+
+  <xs:complexType name="cb_notify_deviceid">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- NFSv4.2 Callback Operations -->
+
+  <!-- Op 15: CB_OFFLOAD - Report the results of an asynchronous operation -->
+
+  <xs:complexType name="cb_offload">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <!-- Op 10044 - CB_ILLEGAL: Illegal op -->
+
+  <xs:complexType name="cb_illegal">
+    <xs:sequence/>
+  </xs:complexType>
+
+</xs:schema>

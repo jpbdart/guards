@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpc:onc_rpc xmlns:oncrpc="urn:oncrpc">
+  <recfragment>
+    <dataSize xmlns="">2147483752</dataSize>
+  </recfragment>
+  <xid>2815677479</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">4</vers>
+      <proc xmlns="">1</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>32</authlen>
+            <stamp>4655363</stamp>
+            <machineName>
+              <strValue>6E65746170702D3236</strValue>
+            </machineName>
+            <uid>0</uid>
+            <gid>0</gid>
+            <auxGIDElements>0</auxGIDElements>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none>
+            <authlen>
+              <opaque></opaque>
+            </authlen>
+          </auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <nfsv4>
+          <compound>
+            <tag>
+              <opaque></opaque>
+            </tag>
+            <minorversion>1</minorversion>
+            <numargs>1</numargs>
+            <nfscmd>
+              <opcode>44</opcode>
+              <op_dispatch>
+                <destroy_session>
+                  <dsa_sessionid>000002D2E01482000000000000000402</dsa_sessionid>
+                </destroy_session>
+              </op_dispatch>
+            </nfscmd>
+          </compound>
+        </nfsv4>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpc:onc_rpc>

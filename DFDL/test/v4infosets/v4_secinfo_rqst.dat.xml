@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpc:onc_rpc xmlns:oncrpc="urn:oncrpc">
+  <recfragment>
+    <dataSize xmlns="">2147483784</dataSize>
+  </recfragment>
+  <xid>2379469863</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">4</vers>
+      <proc xmlns="">1</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>36</authlen>
+            <stamp>4655358</stamp>
+            <machineName>
+              <strValue>6E65746170702D3236</strValue>
+            </machineName>
+            <uid>0</uid>
+            <gid>0</gid>
+            <auxGIDElements>1</auxGIDElements>
+            <GIDValues>0</GIDValues>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none>
+            <authlen>
+              <opaque></opaque>
+            </authlen>
+          </auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <nfsv4>
+          <compound>
+            <tag>
+              <opaque></opaque>
+            </tag>
+            <minorversion>1</minorversion>
+            <numargs>3</numargs>
+            <nfscmd>
+              <opcode>53</opcode>
+              <op_dispatch>
+                <sequence>
+                  <sa_sessionid>000002D2E01482000000000000000402</sa_sessionid>
+                  <sa_sequenceid>2</sa_sequenceid>
+                  <sa_slotid>0</sa_slotid>
+                  <sa_highest_slotid>0</sa_highest_slotid>
+                  <sa_cachethis>false</sa_cachethis>
+                </sequence>
+              </op_dispatch>
+            </nfscmd>
+            <nfscmd>
+              <opcode>24</opcode>
+              <op_dispatch>
+                <putrootfh></putrootfh>
+              </op_dispatch>
+            </nfscmd>
+            <nfscmd>
+              <opcode>52</opcode>
+              <op_dispatch>
+                <secinfo_no_name>
+                  <args>0</args>
+                </secinfo_no_name>
+              </op_dispatch>
+            </nfscmd>
+          </compound>
+        </nfsv4>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpc:onc_rpc>

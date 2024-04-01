@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<tdml:testSuite
+  defaultRoundTrip="onePass"
+  description="NFSv4 RR tests"
+  suiteName="TestV4RR"
+  xmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext"
+  xmlns:tdml="http://www.ibm.com/xmlns/dfdl/testData"
+  defaultValidation="on">
+
+  <!--
+      Run the tests (try with -I daffodilC too):
+      DAFFODIL_CLASSPATH=../src daffodil test -i -I daffodil TestV4RR.tdml
+
+      Write the XML infosets:
+      bash -x -c 'for f in v4RRdata/*; do DAFFODIL_CLASSPATH=../src daffodil parse -r RqstRply -s RequestReply.dfdl.xsd -o $f.xml $f; done'
+
+      Test the C code generator:
+      DAFFODIL_CLASSPATH=../src daffodil generate c -r RqstRply -s RequestReply.dfdl.xsd
+  -->
+
+  <tdml:parserTestCase name="exchange_id_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_exchange_id_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_exchange_id_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="create_session_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_create_session_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_create_session_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="reclaim_complete_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_reclaim_complete_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_reclaim_complete_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="secinfo_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_secinfo_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_secinfo_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="getattr_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_getattr_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_getattr_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="access_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_access_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_access_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="lookup_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_lookup_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_lookup_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="open_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_open_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_open_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="write_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_write_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_write_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="read_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_read_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_read_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="layoutreturn_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_layoutreturn_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_layoutreturn_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="dest_session_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_dest_session_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_dest_session_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="dest_client_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_dest_client_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_dest_client_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="close_RR" root="RqstRply" model="RequestReply.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4RRdata/v4_close_RR.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4RRinfosets/v4_close_RR.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+</tdml:testSuite>

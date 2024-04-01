@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<tdml:testSuite
+  defaultRoundTrip="onePass"
+  description="NFSv4 tests"
+  suiteName="TestV4"
+  xmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext"
+  xmlns:tdml="http://www.ibm.com/xmlns/dfdl/testData"
+  defaultValidation="on">
+
+  <!--
+      Run the tests (try with -I daffodilC too):
+      DAFFODIL_CLASSPATH=../src daffodil test -i -I daffodil TestV4.tdml
+
+      Write the XML infosets:
+      bash -x -c 'for f in v4data/*; do DAFFODIL_CLASSPATH=../src daffodil parse -r onc_rpc -s oncrpc.dfdl.xsd -o $f.xml $f; done'
+
+      Test the C code generator:
+      DAFFODIL_CLASSPATH=../src daffodil generate c -r onc_rpc -s oncrpc.dfdl.xsd
+  -->
+
+  <tdml:parserTestCase name="exchange_id_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_exchange_id_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_exchange_id_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="create_session_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_create_session_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_create_session_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="reclaim_complete_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_reclaim_complete_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_reclaim_complete_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="secinfo_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_secinfo_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_secinfo_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="getattr_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_getattr_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_getattr_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="getattr2_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_getattr2_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_getattr2_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="getattr3_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_getattr3_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_getattr3_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="getattr4_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_getattr4_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_getattr4_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="access_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_access_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_access_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="lookup_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_lookup_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_lookup_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="open_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_open_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_open_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="read_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_read_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_read_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="layoutreturn_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_layoutreturn_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_layoutreturn_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="write_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_write_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_write_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+
+  <tdml:parserTestCase name="dest_session_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_dest_session_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_dest_session_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="dest_client_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_dest_client_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_dest_client_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="close_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_close_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_close_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="compound_open_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_compound_open_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_compound_open_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="delegreturn_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_delegreturn_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_delegreturn_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="setclient_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_setclient_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_setclient_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+  <tdml:parserTestCase name="setclient_confirm_rqst" root="onc_rpc" model="oncrpc.dfdl.xsd">
+    <tdml:document>
+      <tdml:documentPart type="file">v4data/v4_setclient_confirm_rqst.dat</tdml:documentPart>
+    </tdml:document>
+    <tdml:infoset>
+      <tdml:dfdlInfoset type="file">v4infosets/v4_setclient_confirm_rqst.dat.xml</tdml:dfdlInfoset>
+    </tdml:infoset>
+  </tdml:parserTestCase>
+	  
+</tdml:testSuite>

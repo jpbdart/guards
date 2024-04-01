@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+NFS Replies - main
+
+Author: J Peter Brady
+
+DFDL implementation of NFS replies.
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:ReplyMainV3"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:dfdlx="http://www.ogf.org/dfdl/dfdl-1.0/extensions"
+  xmlns:net="urn:network/format"
+  xmlns:nfsv3="urn:nfsv3"
+  xmlns:oncrpcv3="urn:oncrpcv3"
+  xmlns:pmr="urn:portmapReply"
+  xmlns:rm3="urn:ReplyMainV3"
+  xmlns:rr3="urn:RequestReplyV3"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- NFS types -->
+
+  <xs:import namespace="urn:RequestReplyV3" schemaLocation="RequestReplyV3.dfdl.xsd" />
+  <xs:import namespace="urn:oncrpcv3"       schemaLocation="oncrpcv3.dfdl.xsd" />
+  <xs:import namespace="urn:nfsv3"          schemaLocation="nfsv3.dfdl.xsd"/>
+  <xs:import namespace="urn:portmapReply"   schemaLocation="portmapReply.dfdl.xsd"/>
+  <xs:import namespace="urn:xdr"            schemaLocation="xdr.dfdl.xsd"/>
+
+  <xs:complexType name="reply_body">
+    <xs:sequence>
+     <xs:element name="status" type="xdr:unsignedInt" />
+     <xs:element name="reply_dispatch">
+       <xs:complexType>
+         <xs:choice dfdl:choiceDispatchKey="{ xs:string(../status) }">
+           <xs:element name="accept_reply" type="rm3:accept_reply" dfdl:choiceBranchKey="0" />
+           <xs:element name="reject_reply" type="rm3:reject_reply" dfdl:choiceBranchKey="1" />
+         </xs:choice>
+       </xs:complexType>
+     </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="accept_reply">
+    <xs:sequence>
+      <xs:element name="verf"    type="oncrpcv3:opaque_auth" />
+      <xs:element name="accept_status" type="xdr:unsignedInt" />
+
+      <!-- Decision to dispatch a NFSv3 reply -->
+     <xs:element name="accept_dispatch">
+      <xs:complexType>
+        <xs:choice><!--dfdl:choiceDispatchKey="{ xs:string(/rr3:RqstRplyV3/Request/entry_dispatch/call_body/vers) }"-->
+          <!-- NFSv3 choices -->
+          <xs:element name="nfsv3_dispatch"><!--dfdl:choiceBranchKey="3"-->
+            <xs:complexType>
+              <xs:choice dfdl:choiceDispatchKey="{ xs:string(/rr3:RqstRplyV3/Request/entry_dispatch/call_body/prog) }">
+                <xs:element name="portmap" type="pmr:portmapreply" dfdl:choiceBranchKey="100000" />
+                <xs:element name="nfsv3"   type="rm3:nfsv3reply"   dfdl:choiceBranchKey="100003" />
+                <xs:element name="mountd"  type="rm3:mountdreply"  dfdl:choiceBranchKey="100005" />
+              </xs:choice>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+     </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reject_reply">
+    <xs:sequence>
+      <xs:element name="reject_status" type="xdr:unsignedInt"/>
+      <xs:element name="reject_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../reject_status) }">
+            <xs:element name="rpc_mismatch" type="oncrpcv3:rpc_mismatch"  dfdl:choiceBranchKey="0" />
+            <xs:element name="auth_error" type="oncrpcv3:auth_error" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nfsv3reply">
+    <xs:sequence>
+      <!--
+      <xs:choice dfdl:choiceDispatchKey="{ xs:string(/rr3:RqstRplyV3/Request/entry_dispatch/call_body/proc) }">
+        <xs:element name="null"         type="nfsv3:null"         dfdl:choiceBranchKey="0" />
+        <xs:element name="getattr"      type="nfsv3:getattr"      dfdl:choiceBranchKey="1" />
+        <xs:element name="setattr"      type="nfsv3:setattr"      dfdl:choiceBranchKey="2" />
+        <xs:element name="lookup"       type="nfsv3:lookup"       dfdl:choiceBranchKey="3" />
+        <xs:element name="access"       type="nfsv3:access"       dfdl:choiceBranchKey="4" />
+        <xs:element name="readlink"     type="nfsv3:readlink"     dfdl:choiceBranchKey="5" />
+        <xs:element name="read"         type="nfsv3:read"         dfdl:choiceBranchKey="6" />
+        <xs:element name="write"        type="nfsv3:write"        dfdl:choiceBranchKey="7" />
+        <xs:element name="create"       type="nfsv3:create"       dfdl:choiceBranchKey="8" />
+        <xs:element name="mkdir"        type="nfsv3:mkdir"        dfdl:choiceBranchKey="9" />
+        <xs:element name="symlink"      type="nfsv3:symlink"      dfdl:choiceBranchKey="10" />
+        <xs:element name="mknod"        type="nfsv3:mknod"        dfdl:choiceBranchKey="11" />
+        <xs:element name="remove"       type="nfsv3:remove"       dfdl:choiceBranchKey="12" />
+        <xs:element name="rmdir"        type="nfsv3:rmdir"        dfdl:choiceBranchKey="13" />
+        <xs:element name="rename"       type="nfsv3:rename"       dfdl:choiceBranchKey="14" />
+        <xs:element name="link"         type="nfsv3:link"         dfdl:choiceBranchKey="15" />
+        <xs:element name="readdir"      type="nfsv3:readdir"      dfdl:choiceBranchKey="16" />
+        <xs:element name="readdirplus"  type="nfsv3:readdirplus"  dfdl:choiceBranchKey="17" />
+        <xs:element name="fsstat"       type="nfsv3:fsstat"       dfdl:choiceBranchKey="18" />
+        <xs:element name="fsinfo"       type="nfsv3:fsinfo"       dfdl:choiceBranchKey="19" />
+        <xs:element name="pathconf"     type="nfsv3:pathconf"     dfdl:choiceBranchKey="20" />
+        <xs:element name="commit"       type="nfsv3:commit"       dfdl:choiceBranchKey="21" />
+      </xs:choice>
+      -->
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="mountdreply">
+    <xs:choice>
+      <xs:element name="mountd_mt"      type="rm3:mountd_mt" />
+    </xs:choice>
+    <!--
+    <xs:choice dfdl:choiceDispatchKey="{ xs:string(/rr3:RqstRplyV3/Request/entry_dispatch/call_body/proc) }">
+      <xs:element name="mountd_null"    type="rm3:mountd_null"    dfdl:choiceBranchKey="0" />
+      <xs:element name="mountd_mt"      type="rm3:mountd_mt"      dfdl:choiceBranchKey="1" />
+      <xs:element name="mountd_dump"    type="nfsv3:mountd_dump"    dfdl:choiceBranchKey="2" />
+      <xs:element name="mountd_umt"     type="nfsv3:mountd_umt"     dfdl:choiceBranchKey="3" />
+      <xs:element name="mountd_umntall" type="nfsv3:mountd_umntall" dfdl:choiceBranchKey="4" />
+      <xs:element name="mountd_export"  type="nfsv3:mountd_export"  dfdl:choiceBranchKey="5" />
+    </xs:choice>
+    -->
+  </xs:complexType>
+
+  <xs:complexType name="mountd_null">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mountd_mt">
+    <xs:sequence>
+      <xs:element name="fhs_status" type="xdr:unsignedInt" />
+      <xs:element name="fhandle" type="xdr:opaque" />
+      <xs:element name="flavor" type="xdr:unsignedInt" />
+      <xs:element name="auth_flavors" type="xdr:unsignedInt" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{../flavor }"/>
+
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

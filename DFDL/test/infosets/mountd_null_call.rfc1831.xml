@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpcv3:onc_rpc3 xmlns:oncrpcv3="urn:oncrpcv3">
+  <xid>943945305</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100005</prog>
+      <vers xmlns="">3</vers>
+      <proc xmlns="">0</proc>
+      <cred xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none></auth_none>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none></auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <v3_dispatch>
+          <mountd>
+            <mountd_null></mountd_null>
+          </mountd>
+        </v3_dispatch>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpcv3:onc_rpc3>

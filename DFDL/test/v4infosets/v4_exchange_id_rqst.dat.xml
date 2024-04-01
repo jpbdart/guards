@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpc:onc_rpc xmlns:oncrpc="urn:oncrpc">
+  <recfragment>
+    <dataSize xmlns="">2147483888</dataSize>
+  </recfragment>
+  <xid>2329138215</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">4</vers>
+      <proc xmlns="">1</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>32</authlen>
+            <stamp>4655358</stamp>
+            <machineName>
+              <strValue>6E65746170702D3236</strValue>
+            </machineName>
+            <uid>0</uid>
+            <gid>0</gid>
+            <auxGIDElements>0</auxGIDElements>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none>
+            <authlen>
+              <opaque></opaque>
+            </authlen>
+          </auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <nfsv4>
+          <compound>
+            <tag>
+              <opaque></opaque>
+            </tag>
+            <minorversion>1</minorversion>
+            <numargs>1</numargs>
+            <nfscmd>
+              <opcode>42</opcode>
+              <op_dispatch>
+                <exchange_id>
+                  <eia_clientowner>
+                    <co_verifier>5C8A9BFE0C095E92</co_verifier>
+                    <co_ownerid>
+                      <opaque>4C696E7578204E465376342E31206E65746170702D3236</opaque>
+                    </co_ownerid>
+                  </eia_clientowner>
+                  <eia_flags>257</eia_flags>
+                  <eia_state_protect>
+                    <mode>0</mode>
+                    <protect_dispatch>
+                      <spa_void></spa_void>
+                    </protect_dispatch>
+                  </eia_state_protect>
+                  <exchval>1</exchval>
+                  <eia_client_impl_id>
+                    <nii_domain>
+                      <opaque>6B65726E656C2E6F7267</opaque>
+                    </nii_domain>
+                    <nii_name>
+                      <opaque>4C696E757820332E31302E302D3935372E656C372E7838365F363420233120534D5020546875204F637420342032303A34383A3531205554432032303138207838365F3634</opaque>
+                    </nii_name>
+                    <nii_date>
+                      <seconds>0</seconds>
+                      <nseconds>0</nseconds>
+                    </nii_date>
+                  </eia_client_impl_id>
+                </exchange_id>
+              </op_dispatch>
+            </nfscmd>
+          </compound>
+        </nfsv4>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpc:onc_rpc>

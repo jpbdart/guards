@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+NFS Replies - main
+
+Author: J Peter Brady
+
+DFDL implementation of NFS replies.
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:ReplyMain"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:dfdlx="http://www.ogf.org/dfdl/dfdl-1.0/extensions"
+  xmlns:net="urn:network/format"
+  xmlns:oncrpc="urn:oncrpc"
+  xmlns:rm="urn:ReplyMain"
+  xmlns:rr="urn:RequestReply"
+  xmlns:v4="urn:nfsv4"
+  xmlns:v4r="urn:nfsv4Reply"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- NFS types -->
+
+  <xs:import namespace="urn:RequestReply" schemaLocation="RequestReply.dfdl.xsd" />
+  <xs:import namespace="urn:oncrpc"       schemaLocation="oncrpc.dfdl.xsd" />
+  <xs:import namespace="urn:nfsv4"        schemaLocation="nfsv4.dfdl.xsd"/>
+  <xs:import namespace="urn:nfsv4Reply"   schemaLocation="nfsv4Reply.dfdl.xsd"/>
+  <xs:import namespace="urn:xdr"          schemaLocation="xdr.dfdl.xsd"/>
+
+  <xs:complexType name="reply_body">
+    <xs:sequence>
+     <xs:element name="status" type="xdr:unsignedInt" />
+     <xs:element name="reply_dispatch">
+       <xs:complexType>
+         <xs:choice dfdl:choiceDispatchKey="{ xs:string(../status) }">
+           <xs:element name="accept_reply" type="rm:accept_reply" dfdl:choiceBranchKey="0" />
+           <xs:element name="reject_reply" type="rm:reject_reply" dfdl:choiceBranchKey="1" />
+         </xs:choice>
+       </xs:complexType>
+     </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="accept_reply">
+    <xs:sequence>
+      <xs:element name="verf"    type="oncrpc:opaque_auth" />
+      <xs:element name="accept_status" type="xdr:unsignedInt" />
+
+      <!-- Decision to dispatch NFSv4 reply -->
+     <xs:element name="accept_dispatch">
+      <xs:complexType>
+        <xs:choice><!--dfdl:choiceDispatchKey="{ xs:string(/rr:RqstRply/Request/entry_dispatch/call_body/vers) }"-->
+          <!-- NFSv4 choices -->
+          <xs:element name="nfsv4" type="v4r:nfsv4reply" /><!--dfdl:choiceBranchKey="4"-->
+        </xs:choice>
+      </xs:complexType>
+     </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reject_reply">
+    <xs:sequence>
+      <xs:element name="reject_status" type="xdr:unsignedInt"/>
+      <xs:element name="reject_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../reject_status) }">
+            <xs:element name="rpc_mismatch" type="oncrpc:rpc_mismatch"  dfdl:choiceBranchKey="0" />
+            <xs:element name="auth_error" type="oncrpc:auth_error" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

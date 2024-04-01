@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpcv3:onc_rpc3 xmlns:oncrpcv3="urn:oncrpcv3">
+  <xid>1578961897</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">3</vers>
+      <proc xmlns="">14</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>52</authlen>
+            <stamp>944207371</stamp>
+            <machineName>
+              <strValue>776572726D73636865</strValue>
+            </machineName>
+            <uid>0</uid>
+            <gid>1</gid>
+            <auxGIDElements>5</auxGIDElements>
+            <GIDValues>1</GIDValues>
+            <GIDValues>0</GIDValues>
+            <GIDValues>2</GIDValues>
+            <GIDValues>3</GIDValues>
+            <GIDValues>17</GIDValues>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none></auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <v3_dispatch>
+          <v3cmds>
+            <rename>
+              <from>
+                <dir>
+                  <fh_data>
+                    <opaque>00101085000003E7000A00000000B25A00000029000A00000000B25A00000029</opaque>
+                  </fh_data>
+                </dir>
+                <name>
+                  <strValue>61</strValue>
+                </name>
+              </from>
+              <to>
+                <dir>
+                  <fh_data>
+                    <opaque>00101085000003E7000A00000000B25A00000029000A00000000B25A00000029</opaque>
+                  </fh_data>
+                </dir>
+                <name>
+                  <strValue>616D</strValue>
+                </name>
+              </to>
+            </rename>
+          </v3cmds>
+        </v3_dispatch>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpcv3:onc_rpc3>

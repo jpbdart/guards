@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ONC RPC
+
+Author: J Peter Brady
+
+DFDL implementation of ONC RPC based on RFC 1831. Element names have been used that mimic
+the ones used in the specification.
+
+08-Dec-22  jpb  Begin moving away from using RFC number as we're incorporating RFC changes to the
+                ONC-RPC spec post-1831.
+
+-->
+
+<!--
+Copyright 2024 J. Peter Brady
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
+<xs:schema
+  targetNamespace="urn:oncrpc"
+  xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+  xmlns:net="urn:network/format"
+  xmlns:oncrpc="urn:oncrpc"
+  xmlns:v4="urn:nfsv4"
+  xmlns:xdr="urn:xdr"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Network-byte-order binary format -->
+
+  <xs:import namespace="urn:network/format" schemaLocation="network/format.dfdl.xsd"/>
+
+  <xs:annotation>
+    <xs:appinfo source="http://www.ogf.org/dfdl/">
+      <dfdl:format ref="net:format"/>
+    </xs:appinfo>
+  </xs:annotation>
+
+  <!-- NFS types -->
+
+  <xs:import namespace="urn:nfsv4" schemaLocation="nfsv4.dfdl.xsd"/>
+  <xs:import namespace="urn:xdr" schemaLocation="xdr.dfdl.xsd"/>
+
+  <!--
+      List of constants that map to the RFC1831 specification.
+  -->
+
+  <xs:simpleType name="MSG_ACCEPTED">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:enumeration value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="MSG_DENIED">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:enumeration value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="VERSION_2">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:totalDigits value="1"/>
+      <xs:minInclusive value="2"/>
+      <xs:maxInclusive value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="VERSION_3">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:totalDigits value="1"/>
+      <xs:minInclusive value="3"/>
+      <xs:maxInclusive value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Define a complex type for the 32-bit record fragment -->
+  <xs:complexType name="fragmentType">
+    <xs:sequence>
+      <!-- Fragment indicator - MSB - 1st bit -->
+      <!-- Size of data - Remaining 31 bits -->
+      <xs:element name="dataSize" type="xdr:unsignedInt"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!--
+      Initial ONC-RPC entry for test group TestRfc1830 - struct rpc_msg
+  -->
+  <xs:element name="onc_rpc">
+  <xs:complexType>
+    <xs:sequence>
+
+    <xs:element name="recfragment" type="oncrpc:fragmentType" />
+    <xs:element name="xid" type="xdr:unsignedInt" />
+
+      <xs:element name="mtype" type="xdr:unsignedInt" />
+      <xs:element name="rpc_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../mtype) }">
+            <xs:element name="call"  type="oncrpc:call_body"  dfdl:choiceBranchKey="0" />
+            <xs:element name="reply" type="oncrpc:reply_body" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  </xs:element>
+
+  <!-- The entry point for RPC calls -->
+  <xs:complexType name="call_body">
+    <xs:sequence>
+      <!-- Start by checking the variables that we can check easily-->
+      <xs:element name="rpcvers" type="oncrpc:VERSION_2" >
+        <!--
+        <xs:annotation>
+          <xs:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="RPC version not equal to 2" test="{ dfdl:checkConstraints(../rpcvers) }" />
+          </xs:appinfo>
+        </xs:annotation>
+        -->  
+      </xs:element>
+
+      <xs:element name="prog"    type="xdr:unsignedInt" />
+      <xs:element name="vers"    type="xdr:unsignedInt" />
+      <xs:element name="proc"    type="xdr:unsignedInt" />
+      <xs:element name="cred"    type="oncrpc:opaque_auth" />
+      <xs:element name="verf"    type="oncrpc:opaque_auth" />
+
+      <!-- Decision to dispatch a NFSv4 command -->
+      <xs:element name="call_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../vers) }">
+
+            <!-- NFSv4 selected -->
+            <xs:element name="nfsv4" type="v4:nfsv4" dfdl:choiceBranchKey="4"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- The entry point for RPC replies -->
+  <xs:complexType name="reply_body">
+    <xs:sequence>
+      <xs:element name="status" type="xdr:unsignedInt" />
+      <xs:element name="reply_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../status) }">
+            <xs:element name="accept_reply"  type="oncrpc:accept_reply"  dfdl:choiceBranchKey="0" />
+            <xs:element name="reject_reply" type="oncrpc:reject_reply" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="accept_reply">
+    <xs:sequence>
+      <xs:element name="verf"    type="oncrpc:opaque_auth" />
+      <xs:element name="accept_status" type="xdr:unsignedInt" />
+      <xs:element name="accept_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../accept_status) }">
+            <xs:element name="success" type="oncrpc:reply_success" dfdl:choiceBranchKey="0" />
+            <xs:element name="prog_mismatch" type="oncrpc:prog_mismatch" dfdl:choiceBranchKey="2" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reply_success">
+    <xs:sequence>
+      <xs:element name="results" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="prog_mismatch">
+    <xs:sequence>
+      <xs:element name="low" type="xdr:unsignedInt" />
+      <xs:element name="high" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reject_reply">
+    <xs:sequence>
+      <xs:element name="reject_status" type="xdr:unsignedInt"/>
+      <xs:element name="reject_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../reject_status) }">
+            <xs:element name="rpc_mismatch" type="oncrpc:rpc_mismatch" dfdl:choiceBranchKey="0" />
+            <xs:element name="auth_error" type="oncrpc:auth_error" dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="rpc_mismatch">
+    <xs:sequence>
+      <xs:element name="low" type="xdr:unsignedInt" />
+      <xs:element name="high" type="xdr:unsignedInt" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Authentication failure status. This is upgraded to RFC 5531. -->
+  <xs:simpleType name="AUTH_STAT">
+    <xs:restriction base="xdr:unsignedInt">
+      <xs:totalDigits value="2"/>
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="14"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="auth_error">
+    <xs:sequence>
+      <xs:element name="stat" type="oncrpc:AUTH_STAT">
+      <!--
+        <xs:annotation>
+          <xs:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Authentication error status not between 0 to 14" test="{ dfdl:checkConstraints(../stat) }" />
+          </xs:appinfo>
+        </xs:annotation>
+      -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="opaque_auth">
+    <xs:sequence>
+      <xs:element name="auth_type" type="xdr:unsignedInt" />
+      <xs:element name="auth_dispatch">
+        <xs:complexType>
+          <xs:choice dfdl:choiceDispatchKey="{ xs:string(../auth_type) }">
+            <xs:element name="auth_none"  type="oncrpc:authnone"  dfdl:choiceBranchKey="0" />
+            <xs:element name="auth_unix"  type="oncrpc:authunix"  dfdl:choiceBranchKey="1" />
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="authnone">
+    <xs:sequence>
+      <xs:element name="authlen" type="xdr:opaque" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!--
+    Note that RFC 5531 says the max number of GIDs allowed is 16 for AUTH_UNIX/AUTH_SYS.
+    More than 16 groups should use RPCSEC_GSS instead. Newer servers can use the "manage-gids"
+    option for rpc.mountd which will ignore the groups sent by the client and resolve
+    membership server-side.
+  -->
+  <xs:complexType name="authunix">
+    <xs:sequence>
+      <xs:element name="authlen" type="xdr:unsignedInt" />
+      <xs:element name="stamp" type="xdr:unsignedInt" />
+      <xs:element name="machineName" type="xdr:string" />
+      <xs:element name="uid" type="xdr:unsignedInt" />
+      <xs:element name="gid" type="xdr:unsignedInt" />
+      <xs:element name="auxGIDElements" type="xdr:unsignedInt" />
+      <xs:element name="GIDValues" type="xdr:unsignedInt" minOccurs="0" maxOccurs="16" dfdl:occursCountKind="expression" dfdl:occursCount="{../auxGIDElements}" />
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

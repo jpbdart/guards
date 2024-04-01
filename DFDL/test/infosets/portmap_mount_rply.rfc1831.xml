@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpcv3:onc_rpc3 xmlns:oncrpcv3="urn:oncrpcv3">
+  <xid>943935337</xid>
+  <mtype>1</mtype>
+  <rpc_dispatch>
+    <reply>
+      <status>0</status>
+      <reply_dispatch>
+        <accept_reply>
+          <verf>
+            <auth_type xmlns="">0</auth_type>
+            <auth_dispatch xmlns="">
+              <auth_none></auth_none>
+            </auth_dispatch>
+          </verf>
+          <accept_status>0</accept_status>
+          <accept_dispatch>
+            <success>
+              <results>
+                <opaque xmlns="">3133392E32352E32322E3130322E342E3234</opaque>
+              </results>
+            </success>
+          </accept_dispatch>
+        </accept_reply>
+      </reply_dispatch>
+    </reply>
+  </rpc_dispatch>
+</oncrpcv3:onc_rpc3>

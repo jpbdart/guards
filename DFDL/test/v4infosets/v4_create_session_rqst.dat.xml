@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oncrpc:onc_rpc xmlns:oncrpc="urn:oncrpc">
+  <recfragment>
+    <dataSize xmlns="">2147483852</dataSize>
+  </recfragment>
+  <xid>2345915431</xid>
+  <mtype>0</mtype>
+  <rpc_dispatch>
+    <call>
+      <rpcvers xmlns="">2</rpcvers>
+      <prog xmlns="">100003</prog>
+      <vers xmlns="">4</vers>
+      <proc xmlns="">1</proc>
+      <cred xmlns="">
+        <auth_type>1</auth_type>
+        <auth_dispatch>
+          <auth_unix>
+            <authlen>32</authlen>
+            <stamp>4655358</stamp>
+            <machineName>
+              <strValue>6E65746170702D3236</strValue>
+            </machineName>
+            <uid>0</uid>
+            <gid>0</gid>
+            <auxGIDElements>0</auxGIDElements>
+          </auth_unix>
+        </auth_dispatch>
+      </cred>
+      <verf xmlns="">
+        <auth_type>0</auth_type>
+        <auth_dispatch>
+          <auth_none>
+            <authlen>
+              <opaque></opaque>
+            </authlen>
+          </auth_none>
+        </auth_dispatch>
+      </verf>
+      <call_dispatch xmlns="">
+        <nfsv4>
+          <compound>
+            <tag>
+              <opaque></opaque>
+            </tag>
+            <minorversion>1</minorversion>
+            <numargs>1</numargs>
+            <nfscmd>
+              <opcode>43</opcode>
+              <op_dispatch>
+                <create_session>
+                  <csa_clientid>16146673500541682386</csa_clientid>
+                  <csa_sequence>1</csa_sequence>
+                  <csa_flags>3</csa_flags>
+                  <csa_fore_chan_attrs>
+                    <ca_headerpadsize>0</ca_headerpadsize>
+                    <ca_maxrequestsize>1049620</ca_maxrequestsize>
+                    <ca_maxresponsesize>1049480</ca_maxresponsesize>
+                    <ca_maxresponsesize_cached>3428</ca_maxresponsesize_cached>
+                    <ca_maxoperations>8</ca_maxoperations>
+                    <ca_maxrequests>64</ca_maxrequests>
+                    <ca_rdma_ird>0</ca_rdma_ird>
+                  </csa_fore_chan_attrs>
+                  <csa_back_chan_attrs>
+                    <ca_headerpadsize>0</ca_headerpadsize>
+                    <ca_maxrequestsize>4096</ca_maxrequestsize>
+                    <ca_maxresponsesize>4096</ca_maxresponsesize>
+                    <ca_maxresponsesize_cached>0</ca_maxresponsesize_cached>
+                    <ca_maxoperations>2</ca_maxoperations>
+                    <ca_maxrequests>1</ca_maxrequests>
+                    <ca_rdma_ird>0</ca_rdma_ird>
+                  </csa_back_chan_attrs>
+                  <csa_cb_program>1073741824</csa_cb_program>
+                  <csa_sec_parms>
+                    <mode>1</mode>
+                    <callback_dispatch>
+                      <cbsp_sys_cred>
+                        <authlen>1</authlen>
+                        <stamp>201940626</stamp>
+                        <machinename>
+                          <opaque>6E65746170702D3236</opaque>
+                        </machinename>
+                        <uid>0</uid>
+                        <gid>0</gid>
+                        <gids>
+                          <opaque></opaque>
+                        </gids>
+                      </cbsp_sys_cred>
+                    </callback_dispatch>
+                  </csa_sec_parms>
+                </create_session>
+              </op_dispatch>
+            </nfscmd>
+          </compound>
+        </nfsv4>
+      </call_dispatch>
+    </call>
+  </rpc_dispatch>
+</oncrpc:onc_rpc>
